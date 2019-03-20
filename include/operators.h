@@ -245,4 +245,5 @@ __global__ void aux_fields(double *V, double *K, double gdt, double dt,
                            double2* EpAx, double2* EpAy, double2* EpAz);
 // Function to generate grid and treads
 void generate_grid(Grid &par);
+
 #endif

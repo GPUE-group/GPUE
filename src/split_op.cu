@@ -251,27 +251,33 @@ double energy_calc(Grid &par, double2* wfc){
     int zDim = par.ival("zDim");
     int gsize = xDim*yDim*zDim;
 
+    int dimnum = par.ival("dimnum");
+
     double dx = par.dval("dx");
     double dy = par.dval("dy");
     double dz = par.dval("dz");
     double dg = dx*dy*dz;
 
+
+    bool corotating = par.bval("corotating");
+    bool gpe = par.bval("gpe");
+
     cufftHandle plan;
 
-    if (par.ival("dimnum") == 1){
+    if (dimnum == 1){
         plan = par.ival("plan_1d");
     }
-    if (par.ival("dimnum") == 2){
+    if (dimnum == 2){
         plan = par.ival("plan_2d");
     }
-    if (par.ival("dimnum") == 3){
+    if (dimnum == 3){
         plan = par.ival("plan_3d");
     }
 
     double renorm_factor = 1.0/pow(gsize,0.5);
 
     double2 *wfc_c, *wfc_k;
-    double2 *energy_r, *energy_k;
+    double2 *energy_r, *energy_k, *energy_l;
     double *energy;
 
     cudaMalloc((void **) &wfc_c, sizeof(double2)*gsize);
@@ -296,10 +302,50 @@ double energy_calc(Grid &par, double2* wfc){
     cMult<<<grid, threads>>>(wfc_c, energy_k, energy_k);
 
     // Position-space energy
-    vecMult<<<grid, threads>>>(wfc, V, energy_r);
+    // Adding in the nonlinear step for GPE (related to cMultDensity)
+    if (gpe){
+        double interaction = par.dval("interaction");
+        double gDenConst  = par.dval("gDenConst");
+
+        double *real_comp;
+        cudaMalloc((void**) &real_comp, sizeof(double)*gsize);
+        complexMagnitudeSquared<<<grid, threads>>>(wfc, real_comp);
+        scalarMult<<<grid, threads>>>(real_comp,
+                                      gDenConst*interaction,
+                                      real_comp);
+        vecSum<<<grid, threads>>>(real_comp, V, real_comp);
+        vecMult<<<grid, threads>>>(wfc, real_comp, energy_r);
+    }
+    else{
+        vecMult<<<grid, threads>>>(wfc, V, energy_r);
+    }
+
     cMult<<<grid, threads>>>(wfc_c, energy_r, energy_r);
 
-    complexAbsSum<<<grid, threads>>>(energy_r, energy_k, energy);
+    // Adding in angular momementum energy if -l flag is on
+    // TODO: create functions like apply_gauge for this...
+    if (corotating && dimnum > 1){
+        double renorm_factor_x = 1.0/pow(xDim,0.5);
+        double renorm_factor_y = 1.0/pow(yDim,0.5);
+        cudaMalloc((void **) &energy_l, sizeof(double2)*gsize);
+
+        double *Ax = par.dsval("Ax_gpu");
+        double *Ay = par.dsval("Ay_gpu");
+
+        if (dimnum == 2){
+        }
+
+        if (dimnum == 3){
+            double *Az = par.dsval("Az_gpu");
+            double renorm_factor_z = 1.0/pow(zDim,0.5);
+        }
+
+        complexAbsSum<<<grid, threads>>>(energy_r, energy_k, energy_l, energy);
+        cudaFree(energy_l);
+    }
+    else{
+        complexAbsSum<<<grid, threads>>>(energy_r, energy_k, energy);
+    }
 
     double *energy_cpu;
     energy_cpu = (double *)malloc(sizeof(double)*gsize);

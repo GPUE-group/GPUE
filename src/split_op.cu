@@ -12,6 +12,7 @@
 #include "../include/edge.h"
 #include "../include/manip.h"
 #include "../include/vort.h"
+#include "../include/evolution.h"
 #include <string>
 #include <iostream>
 
@@ -258,7 +259,6 @@ double energy_calc(Grid &par, double2* wfc){
     double dz = par.dval("dz");
     double dg = dx*dy*dz;
 
-
     bool corotating = par.bval("corotating");
     bool gpe = par.bval("gpe");
 
@@ -323,22 +323,38 @@ double energy_calc(Grid &par, double2* wfc){
     cMult<<<grid, threads>>>(wfc_c, energy_r, energy_r);
 
     // Adding in angular momementum energy if -l flag is on
-    // TODO: create functions like apply_gauge for this...
     if (corotating && dimnum > 1){
         double renorm_factor_x = 1.0/pow(xDim,0.5);
         double renorm_factor_y = 1.0/pow(yDim,0.5);
+
+        double time = par.dval("time");
+
+        cufftHandle plan_1d = par.ival("plan_1d");
+
         cudaMalloc((void **) &energy_l, sizeof(double2)*gsize);
 
         double *Ax = par.dsval("Ax_gpu");
         double *Ay = par.dsval("Ay_gpu");
 
         if (dimnum == 2){
+            cufftHandle plan_dim2 = par.ival("plan_other2d");
+            apply_gauge(par, wfc, energy_l, (double2 *) Ax, (double2 *) Ay,
+                        renorm_factor_x, renorm_factor_y, 0, plan_1d,
+                        plan_dim2, dx, dy, dz, time);
         }
 
         if (dimnum == 3){
+            cufftHandle plan_dim2 = par.ival("plan_dim2");
+            cufftHandle plan_dim3 = par.ival("plan_dim3");
             double *Az = par.dsval("Az_gpu");
             double renorm_factor_z = 1.0/pow(zDim,0.5);
+            apply_gauge(par, wfc, energy_l, (double2 *) Ax, (double2 *) Ay,
+                        (double2 *) Az, renorm_factor_x,
+                        renorm_factor_y, renorm_factor_z, 0, plan_1d, plan_dim2,
+                        plan_dim3, dx, dy, dz, time, yDim, xDim*yDim);
         }
+
+        cMult<<<grid, threads>>>(wfc, energy_l, energy_l);
 
         complexAbsSum<<<grid, threads>>>(energy_r, energy_k, energy_l, energy);
         cudaFree(energy_l);

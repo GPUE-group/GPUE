@@ -56,4 +56,16 @@ void evolve(Grid &par,
             unsigned int gstate,
             std::string buffer);
 
+void apply_gauge(Grid &par, double2 *in, double2 *out, double2 *Ax, double2 *Ay,
+                 double2 *Az, double renorm_factor_x,
+                 double renorm_factor_y, double renorm_factor_z, bool flip,
+                 cufftHandle plan_1d, cufftHandle plan_dim2,
+                 cufftHandle plan_dim3, double dx, double dy, double dz,
+                 double time, int yDim, int size);
+
+void apply_gauge(Grid &par, double2 *in, double2 *out, double2 *Ax, double2 *Ay,
+                 double renorm_factor_x, double renorm_factor_y, bool flip,
+                 cufftHandle plan_1d, cufftHandle plan_dim2, double dx,
+                 double dy, double dz, double time);
+
 #endif

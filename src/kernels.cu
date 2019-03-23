@@ -160,6 +160,16 @@ __device__ double complexMagnitude(double2 in){
     return sqrt(in.x*in.x + in.y*in.y);
 }
 
+__global__ void energy_sum(double2 *in1, double2 *in2, double *out){
+    int gid = getGid3d3d();
+    out[gid] = in1[gid].x + in2[gid].x;
+}
+
+__global__ void energy_lsum(double *in1, double2 *in2, double *out){
+    int gid = getGid3d3d();
+    out[gid] = in1[gid] + in2[gid].x;
+}
+
 __global__ void complexAbsSum(double2 *in1, double2 *in2, double *out){
     int gid = getGid3d3d();
     double2 temp;

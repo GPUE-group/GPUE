@@ -844,10 +844,6 @@ void generate_fields(Grid &par){
     cudaFree(EpAy_gpu);
     cudaFree(EpAz_gpu);
 
-    cudaFree(Ax_gpu);
-    cudaFree(Ay_gpu);
-    cudaFree(Az_gpu);
-
     cudaFree(x_gpu);
     cudaFree(y_gpu);
     cudaFree(z_gpu);
@@ -859,6 +855,9 @@ void generate_fields(Grid &par){
     if (!energy_calc){
         cudaFree(K_gpu);
         cudaFree(V_gpu);
+        cudaFree(Ax_gpu);
+        cudaFree(Ay_gpu);
+        cudaFree(Az_gpu);
     }
     else{
         par.store("V_gpu",V_gpu);

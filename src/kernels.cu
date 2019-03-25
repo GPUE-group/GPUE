@@ -50,6 +50,13 @@ __global__ void make_cufftDoubleComplex(double *in, double2 *out){
     out[gid].y = 0;
 }
 
+// Function to copy double2* values
+__global__ void copy(double2 *in, double2 *out){
+    int gid = getGid3d3d();
+    out[gid] = in[gid];
+}
+
+
 // function to perform a transposition (2d) or permutation (3d)
 // Note: The 3 ints represent the final placement of that data direction
 //       after transposition

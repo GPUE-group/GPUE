@@ -121,6 +121,15 @@ __host__ __device__ double2 complexMultiply(double2 in1, double2 in2);
 __device__ double2 make_complex(double in, int evolution_type);
 
 /**
+* @brief        copies a double2 value
+* @ingroup      gpu
+* @param        complex input
+* @return       complex output
+*/
+
+__global__ void copy(double2 *in, double2 *out);
+
+/**
 * @brief        Sums the absolute value of two complex arrays
 * @ingroup      gpu
 * @param        Array 1

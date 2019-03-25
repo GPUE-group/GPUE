@@ -324,6 +324,7 @@ double energy_calc(Grid &par, double2* wfc){
 
     // Adding in angular momementum energy if -l flag is on
     if (corotating && dimnum > 1){
+
         double renorm_factor_x = 1.0/pow(xDim,0.5);
         double renorm_factor_y = 1.0/pow(yDim,0.5);
 
@@ -332,32 +333,48 @@ double energy_calc(Grid &par, double2* wfc){
         cufftHandle plan_1d = par.ival("plan_1d");
 
         cudaMalloc((void **) &energy_l, sizeof(double2)*gsize);
+        copy<<<grid, threads>>>(wfc, energy_l);
 
-        double *Ax = par.dsval("Ax_gpu");
-        double *Ay = par.dsval("Ay_gpu");
+        double2 *Ax;
+        double2 *Ay;
+
+        cudaMalloc((void **) &Ax, sizeof(double2)*gsize);
+        cudaMalloc((void **) &Ay, sizeof(double2)*gsize);
+
+        make_cufftDoubleComplex<<<grid, threads>>>(par.dsval("Ax_gpu"),Ax);
+        make_cufftDoubleComplex<<<grid, threads>>>(par.dsval("Ay_gpu"),Ay);
 
         if (dimnum == 2){
             cufftHandle plan_dim2 = par.ival("plan_other2d");
-            apply_gauge(par, wfc, energy_l, (double2 *) Ax, (double2 *) Ay,
+            apply_gauge(par, energy_l, (double2 *) Ax, (double2 *) Ay,
                         renorm_factor_x, renorm_factor_y, 0, plan_1d,
                         plan_dim2, dx, dy, dz, time);
+
         }
 
         if (dimnum == 3){
             cufftHandle plan_dim2 = par.ival("plan_dim2");
             cufftHandle plan_dim3 = par.ival("plan_dim3");
-            double *Az = par.dsval("Az_gpu");
+
+            double2 *Az;
+            cudaMalloc((void **) &Az, sizeof(double2)*gsize);
+            make_cufftDoubleComplex<<<grid, threads>>>(par.dsval("Az_gpu"),Az);
+
             double renorm_factor_z = 1.0/pow(zDim,0.5);
-            apply_gauge(par, wfc, energy_l, (double2 *) Ax, (double2 *) Ay,
+            apply_gauge(par, energy_l, (double2 *) Ax, (double2 *) Ay,
                         (double2 *) Az, renorm_factor_x,
                         renorm_factor_y, renorm_factor_z, 0, plan_1d, plan_dim2,
                         plan_dim3, dx, dy, dz, time, yDim, xDim*yDim);
+
+            cudaFree(Az);
         }
 
-        cMult<<<grid, threads>>>(wfc, energy_l, energy_l);
+        cudaFree(Ax);
+        cudaFree(Ay);
+
+        cMult<<<grid, threads>>>(wfc_c, energy_l, energy_l);
 
         complexAbsSum<<<grid, threads>>>(energy_r, energy_k, energy_l, energy);
-        cudaFree(energy_l);
     }
     else{
         complexAbsSum<<<grid, threads>>>(energy_r, energy_k, energy);
@@ -367,6 +384,7 @@ double energy_calc(Grid &par, double2* wfc){
     energy_cpu = (double *)malloc(sizeof(double)*gsize);
 
     cudaMemcpy(energy_cpu, energy, sizeof(double)*gsize,
+    //cudaMemcpy(energy_cpu, energy_l, sizeof(double)*gsize,
                cudaMemcpyDeviceToHost);
 
     double sum = 0;
@@ -377,6 +395,7 @@ double energy_calc(Grid &par, double2* wfc){
     free(energy_cpu);
     cudaFree(energy_r);
     cudaFree(energy_k);
+    cudaFree(energy_l);
     cudaFree(energy);
     cudaFree(wfc_c);
     cudaFree(wfc_k);

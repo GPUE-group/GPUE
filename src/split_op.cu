@@ -295,6 +295,7 @@ double energy_calc(Grid &par, double2* wfc){
     scalarMult<<<grid, threads>>>(wfc_k, renorm_factor, wfc_k);
 
     vecMult<<<grid, threads>>>(wfc_k, K, energy_k);
+    cudaFree(wfc_k);
 
     cufftExecZ2Z(plan, energy_k, energy_k, CUFFT_INVERSE);
     scalarMult<<<grid, threads>>>(energy_k, renorm_factor, energy_k);
@@ -321,6 +322,11 @@ double energy_calc(Grid &par, double2* wfc){
     }
 
     cMult<<<grid, threads>>>(wfc_c, energy_r, energy_r);
+
+    energy_sum<<<grid, threads>>>(energy_r, energy_k, energy);
+
+    cudaFree(energy_r);
+    cudaFree(energy_k);
 
     // Adding in angular momementum energy if -l flag is on
     if (corotating && dimnum > 1){
@@ -374,10 +380,8 @@ double energy_calc(Grid &par, double2* wfc){
 
         cMult<<<grid, threads>>>(wfc_c, energy_l, energy_l);
 
-        complexAbsSum<<<grid, threads>>>(energy_r, energy_k, energy_l, energy);
-    }
-    else{
-        complexAbsSum<<<grid, threads>>>(energy_r, energy_k, energy);
+        energy_lsum<<<grid, threads>>>(energy, energy_l, energy);
+        cudaFree(energy_l);
     }
 
     double *energy_cpu;
@@ -393,12 +397,8 @@ double energy_calc(Grid &par, double2* wfc){
     }
 
     free(energy_cpu);
-    cudaFree(energy_r);
-    cudaFree(energy_k);
-    cudaFree(energy_l);
     cudaFree(energy);
     cudaFree(wfc_c);
-    cudaFree(wfc_k);
 
     return sum;
 }

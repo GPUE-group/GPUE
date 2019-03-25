@@ -139,6 +139,25 @@ __global__ void copy(double2 *in, double2 *out);
 __global__ void complexAbsSum(double2 *in1, double2 *in2, double *out);
 
 /**
+* @brief        Sums double2* and double2* energies
+* @ingroup      gpu
+* @param        Array 1
+* @param        Array 2
+* @param        Output
+*/
+__global__ void energy_sum(double2 *in1, double2 *in2, double *out);
+
+/**
+* @brief        Sums double* and double2* energies for angular momentum
+* @ingroup      gpu
+* @param        Array 1
+* @param        Array 2
+* @param        Output
+*/
+__global__ void energy_lsum(double *in1, double2 *in2, double *out);
+
+
+/**
 * @brief        Sums the absolute value of two complex arrays
 * @ingroup      gpu
 * @param        Array 1

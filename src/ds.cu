@@ -46,7 +46,7 @@ void generate_plan_other3d(cufftHandle *plan_fft1d, Grid &par, int axis){
 
     cufftResult result;
 
-    // Along first dimension (z)
+    // Along first dimension (x)
     if (axis == 0){
         result = cufftPlan1d(plan_fft1d, xDim, CUFFT_Z2Z, yDim*zDim);
     }
@@ -71,7 +71,7 @@ void generate_plan_other3d(cufftHandle *plan_fft1d, Grid &par, int axis){
         
     }
 
-    // Along third dimension (x)
+    // Along third dimension (z)
     else if (axis == 2){
 
         int batch = xDim*yDim;

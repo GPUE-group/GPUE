@@ -607,7 +607,7 @@ __global__ void krotation_Ax(double *x, double *y, double *z,
                              double omega, double fudge, double *A){
     int gid = getGid3d3d();
     int yid = blockDim.y*blockIdx.y + threadIdx.y;
-    A[gid] = -y[yid] * omega * omegaX;
+    A[gid] = y[yid] * omega * omegaX;
 }
 
 // Kernel for simple rotational case, Ay
@@ -617,7 +617,7 @@ __global__ void krotation_Ay(double *x, double *y, double *z,
                              double omega, double fudge, double *A){
     int gid = getGid3d3d();
     int xid = blockDim.x*blockIdx.x + threadIdx.x;
-    A[gid] = x[xid] * omega * omegaY;
+    A[gid] = -x[xid] * omega * omegaY;
 }
 
 // Kernel for simple rotational case, Ax

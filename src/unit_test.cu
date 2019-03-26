@@ -186,6 +186,77 @@ void math_operator_test(){
     }
 
     std::cout << "Complex addition, subtraction, multiplication, and powers have been tested\n";
+
+    cudaFree(da);
+    cudaFree(db);
+    cudaFree(dc);
+
+
+    std::cout << "Now testing the derive() kernels...\n";
+    // Now testing the derive function
+    int dim = 4;
+    double2 *darray, *darray_gpu, *darray_out;
+    darray = (double2 *)malloc(sizeof(double2)*dim*dim*dim);
+    cudaMalloc((void**) &darray_gpu, sizeof(double2)*dim*dim*dim);
+    cudaMalloc((void**) &darray_out, sizeof(double2)*dim*dim*dim);
+
+    for (int i = 0; i < dim; ++i){
+        for (int j = 0; j < dim; ++j){
+            for (int k = 0; k < dim; ++k){
+                int index = k + j*dim + i*dim*dim;
+                darray[index].x = i + j + k;
+                darray[index].y = i + j + k;
+            }
+        }
+    }
+
+    cudaMemcpy(darray_gpu, darray, sizeof(double2)*dim*dim*dim,
+               cudaMemcpyHostToDevice);
+
+    grid = {1, dim, dim};
+    threads = {dim, 1, 1};
+
+    derive<<<grid, threads>>>(darray_gpu, darray_out, 1, dim*dim*dim,1);
+    cudaMemcpy(darray, darray_out, sizeof(double2)*dim*dim*dim,
+               cudaMemcpyDeviceToHost);
+    for (int i = 0; i < dim-1; ++i){
+        for (int j = 0; j < dim-1; ++j){
+            for (int k = 0; k < dim-1; ++k){
+                int index = k + j*dim + i*dim*dim;
+                assert(darray[index].x == 1);
+                assert(darray[index].y == 1);
+            }
+        }
+    }
+
+    derive<<<grid, threads>>>(darray_gpu, darray_out, dim, dim*dim*dim,1);
+    cudaMemcpy(darray, darray_out, sizeof(double2)*dim*dim*dim,
+               cudaMemcpyDeviceToHost);
+    for (int i = 0; i < dim-1; ++i){
+        for (int j = 0; j < dim-1; ++j){
+            for (int k = 0; k < dim-1; ++k){
+                int index = k + j*dim + i*dim*dim;
+                assert(darray[index].x == 1);
+                assert(darray[index].y == 1);
+            }
+        }
+    }
+
+    derive<<<grid, threads>>>(darray_gpu, darray_out, dim*dim, dim*dim*dim,1);
+    cudaMemcpy(darray, darray_out, sizeof(double2)*dim*dim*dim,
+               cudaMemcpyDeviceToHost);
+    for (int i = 0; i < dim-1; ++i){
+        for (int j = 0; j < dim-1; ++j){
+            for (int k = 0; k < dim-1; ++k){
+                int index = k + j*dim + i*dim*dim;
+                assert(darray[index].x == 1);
+                assert(darray[index].y == 1);
+            }
+        }
+    }
+
+
+    std::cout << "derive functions passed!\n";
 }
 
 __global__ void add_test(double2 *a, double2 *b, double2 *c){

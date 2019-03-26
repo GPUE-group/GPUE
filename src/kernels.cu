@@ -671,6 +671,17 @@ __global__ void zeros(bool *in, bool *out){
     out[gid] = 0;
 }
 
+__global__ void zeros(double *in, double *out){
+    int gid = getGid3d3d();
+    out[gid] = 0;
+}
+
+__global__ void zeros(double2 *in, double2 *out){
+    int gid = getGid3d3d();
+    out[gid].x = 0;
+    out[gid].y = 0;
+}
+
 __global__ void set_eq(double *in1, double *in2){
     int gid = getGid3d3d();
     in2[gid] = in1[gid];

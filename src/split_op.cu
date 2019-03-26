@@ -324,6 +324,7 @@ double energy_calc(Grid &par, double2* wfc){
     cMult<<<grid, threads>>>(wfc_c, energy_r, energy_r);
 
     energy_sum<<<grid, threads>>>(energy_r, energy_k, energy);
+    //zeros<<<grid, threads>>>(energy, energy);
 
     cudaFree(energy_r);
     cudaFree(energy_k);
@@ -331,33 +332,34 @@ double energy_calc(Grid &par, double2* wfc){
     // Adding in angular momementum energy if -l flag is on
     if (corotating && dimnum > 1){
 
-        double2 *Ax, *Ay, *energy_l;
+        double2 *energy_l, *dwfc;
+        double *A;
 
         cudaMalloc((void **) &energy_l, sizeof(double2)*gsize);
-        cudaMalloc((void **) &Ax, sizeof(double2)*gsize);
-        cudaMalloc((void **) &Ay, sizeof(double2)*gsize);
+        cudaMalloc((void **) &dwfc, sizeof(double2)*gsize);
+        cudaMalloc((void **) &A, sizeof(double)*gsize);
 
-        make_cufftDoubleComplex<<<grid, threads>>>(par.dsval("Ax_gpu"),Ax);
-        make_cufftDoubleComplex<<<grid, threads>>>(par.dsval("Ay_gpu"),Ay);
+        A = par.dsval("Ax_gpu");
 
-        cMult<<<grid, threads>>>(energy_l, Ax, energy_l); 
+        derive<<<grid, threads>>>(wfc, energy_l, 1, gsize, dy);
 
-        derive<<<grid, threads>>>(energy_l, energy_l, xDim, gsize, dy);
-        cMult<<<grid, threads>>>(energy_l, Ax, energy_l); 
+        vecMult<<<grid, threads>>>(energy_l, A, energy_l); 
+
+        A = par.dsval("Ay_gpu");
+        derive<<<grid, threads>>>(wfc, dwfc, xDim, gsize, dy);
+
+        vecMult<<<grid, threads>>>(dwfc, A, dwfc); 
+        sum<<<grid, threads>>>(dwfc,energy_l, energy_l);
 
         if (dimnum == 3){
-            double2 *Az;
-            cudaMalloc((void **) &Az, sizeof(double2)*gsize);
-            make_cufftDoubleComplex<<<grid, threads>>>(par.dsval("Az_gpu"),Az);
+            A = par.dsval("Az_gpu");
 
             derive<<<grid, threads>>>(energy_l, energy_l, xDim*yDim, gsize, dz);
-            cMult<<<grid, threads>>>(energy_l, Az, energy_l); 
+            vecMult<<<grid, threads>>>(energy_l, A, energy_l); 
 
-            cudaFree(Az);
         }
 
-        cudaFree(Ax);
-        cudaFree(Ay);
+        cudaFree(A);
 
         cMult<<<grid, threads>>>(wfc_c, energy_l, energy_l);
 

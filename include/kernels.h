@@ -18,6 +18,32 @@
 #include<stdio.h>
 
 /**
+* @brief        derivative of data
+* @param        input data
+* @param        output data
+* @param        stride of derivative, for (xDim, yDim, zDim) derivative,
+                use stride (1, xDim, xDim*yDim)
+* @param        grid size for simulation
+* @param        dx value for derivative
+* @ingroup      gpu
+*/
+__global__ void derive(double *data, double *out, int stride, int gsize,
+                       double dx);
+
+/**
+* @brief        derivative of data
+* @param        input data
+* @param        output data
+* @param        stride of derivative, for (xDim, yDim, zDim) derivative,
+                use stride (1, xDim, xDim*yDim)
+* @param        grid size for simulation
+* @param        dx value for derivative
+* @ingroup      gpu
+*/
+__global__ void derive(double2 *data, double2 *out, int stride, int gsize,
+                       double dx);
+
+/**
 * @brief	subtraction operation for 2 double2 values
 * @ingroup	gpu
 */

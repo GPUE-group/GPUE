@@ -34,6 +34,38 @@ __device__ unsigned int getGid3d3d(){
     return threadId;
 }
 
+// global kernel to perform derivative
+// For xDim derivative, stride = 1
+// For yDim derivative, stride = xDim
+// For zDim derivative, stride = xDim*yDim
+__global__ void derive(double *data, double *out, int stride, int gsize,
+                       double dx){
+    int gid = getGid3d3d();
+    if (gid + stride < gsize){
+        out[gid] = (data[gid+stride] - data[gid])/dx;
+    }
+    else{
+        out[gid] = data[gid]/dx;
+    }
+}
+
+// global kernel to perform derivative
+// For xDim derivative, stride = 1
+// For yDim derivative, stride = xDim
+// For zDim derivative, stride = xDim*yDim
+__global__ void derive(double2 *data, double2 *out, int stride, int gsize,
+                       double dx){
+    int gid = getGid3d3d();
+    if (gid + stride < gsize){
+        out[gid].x = (data[gid+stride].x - data[gid].x)/dx;
+        out[gid].y = (data[gid+stride].y - data[gid].y)/dx;
+    }
+    else{
+        out[gid].x = data[gid].x/dx;
+        out[gid].y = data[gid].y/dx;
+    }
+}
+
 __global__ void is_eq(bool *a, bool *b, bool *ans){
     int gid = getGid3d3d();
     ans[0] = true;

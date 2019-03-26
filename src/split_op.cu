@@ -331,46 +331,27 @@ double energy_calc(Grid &par, double2* wfc){
     // Adding in angular momementum energy if -l flag is on
     if (corotating && dimnum > 1){
 
-        double renorm_factor_x = 1.0/pow(xDim,0.5);
-        double renorm_factor_y = 1.0/pow(yDim,0.5);
-
-        double time = par.dval("time");
-
-        cufftHandle plan_1d = par.ival("plan_1d");
+        double2 *Ax, *Ay, *energy_l;
 
         cudaMalloc((void **) &energy_l, sizeof(double2)*gsize);
-        copy<<<grid, threads>>>(wfc, energy_l);
-
-        double2 *Ax;
-        double2 *Ay;
-
         cudaMalloc((void **) &Ax, sizeof(double2)*gsize);
         cudaMalloc((void **) &Ay, sizeof(double2)*gsize);
 
         make_cufftDoubleComplex<<<grid, threads>>>(par.dsval("Ax_gpu"),Ax);
         make_cufftDoubleComplex<<<grid, threads>>>(par.dsval("Ay_gpu"),Ay);
 
-        if (dimnum == 2){
-            cufftHandle plan_dim2 = par.ival("plan_other2d");
-            apply_gauge(par, energy_l, (double2 *) Ax, (double2 *) Ay,
-                        renorm_factor_x, renorm_factor_y, 0, plan_1d,
-                        plan_dim2, dx, dy, dz, time);
+        cMult<<<grid, threads>>>(energy_l, Ax, energy_l); 
 
-        }
+        derive<<<grid, threads>>>(energy_l, energy_l, xDim, gsize, dy);
+        cMult<<<grid, threads>>>(energy_l, Ax, energy_l); 
 
         if (dimnum == 3){
-            cufftHandle plan_dim2 = par.ival("plan_dim2");
-            cufftHandle plan_dim3 = par.ival("plan_dim3");
-
             double2 *Az;
             cudaMalloc((void **) &Az, sizeof(double2)*gsize);
             make_cufftDoubleComplex<<<grid, threads>>>(par.dsval("Az_gpu"),Az);
 
-            double renorm_factor_z = 1.0/pow(zDim,0.5);
-            apply_gauge(par, energy_l, (double2 *) Ax, (double2 *) Ay,
-                        (double2 *) Az, renorm_factor_x,
-                        renorm_factor_y, renorm_factor_z, 0, plan_1d, plan_dim2,
-                        plan_dim3, dx, dy, dz, time, yDim, xDim*yDim);
+            derive<<<grid, threads>>>(energy_l, energy_l, xDim*yDim, gsize, dz);
+            cMult<<<grid, threads>>>(energy_l, Az, energy_l); 
 
             cudaFree(Az);
         }

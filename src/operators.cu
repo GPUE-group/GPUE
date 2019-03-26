@@ -2,6 +2,60 @@
 #include "../include/kernels.h"
 #include "../include/dynamic.h"
 
+void lapacian(Grid &par, double2 *data, double2* out, int xDim, int yDim,
+              int zDim, double dx, double dy, double dz){
+
+    dim3 grid = par.grid;
+    dim3 threads = par.threads;
+    int gsize = xDim * yDim * zDim;
+
+    double2 *temp_derivative;
+    cudaMalloc((void **) &temp_derivative, sizeof(double2)*gsize);
+    derive<<<grid, threads>>>(data, temp_derivative, 1, gsize, dx);
+    derive<<<grid, threads>>>(temp_derivative, temp_derivative, 1, gsize, dx);
+
+    copy<<<grid, threads>>>(temp_derivative, out);
+
+    derive<<<grid, threads>>>(data, temp_derivative, xDim, gsize, dy);
+    derive<<<grid, threads>>>(temp_derivative, temp_derivative,
+                              xDim, gsize, dy);
+
+    sum<<<grid, threads>>>(temp_derivative, out, out);
+
+    derive<<<grid, threads>>>(data, temp_derivative, xDim*yDim, gsize, dz);
+    derive<<<grid, threads>>>(temp_derivative, temp_derivative,
+                              xDim*yDim, gsize, dz);
+
+    sum<<<grid, threads>>>(temp_derivative, out, out);
+
+    cudaFree(temp_derivative);
+
+}
+
+void lapacian(Grid &par, double2 *data, double2* out, int xDim, int yDim,
+              double dx, double dy){
+
+
+    dim3 grid = par.grid;
+    dim3 threads = par.threads;
+    int gsize = xDim * yDim;
+
+    double2 *temp_derivative;
+    cudaMalloc((void **) &temp_derivative, sizeof(double2)*gsize);
+    derive<<<grid, threads>>>(data, temp_derivative, 1, gsize, dx);
+    derive<<<grid, threads>>>(temp_derivative, temp_derivative, 1, gsize, dx);
+
+    copy<<<grid, threads>>>(temp_derivative, out);
+
+    derive<<<grid, threads>>>(data, temp_derivative, xDim, gsize, dy);
+    derive<<<grid, threads>>>(temp_derivative, temp_derivative,
+                              xDim, gsize, dy);
+
+    sum<<<grid, threads>>>(temp_derivative, out, out);
+
+    cudaFree(temp_derivative);
+}
+
 double sign(double x){
     if (x < 0){
         return -1.0;

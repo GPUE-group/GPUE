@@ -182,6 +182,14 @@ __global__ void energy_sum(double2 *in1, double2 *in2, double *out);
 */
 __global__ void energy_lsum(double *in1, double2 *in2, double *out);
 
+/**
+* @brief        Sums double2* and double2* to an output double2
+* @ingroup      gpu
+* @param        Array 1
+* @param        Array 2
+* @param        Output
+*/
+__global__ void sum(double2 *in1, double2 *in2, double2 *out);
 
 /**
 * @brief        Sums the absolute value of two complex arrays

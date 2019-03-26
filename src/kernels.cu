@@ -209,6 +209,12 @@ __global__ void energy_lsum(double *in1, double2 *in2, double *out){
     out[gid] = in1[gid] + in2[gid].x;
 }
 
+__global__ void sum(double2 *in1, double2 *in2, double2 *out){
+    int gid = getGid3d3d();
+    out[gid].x = in1[gid].x + in2[gid].x;
+    out[gid].y = in1[gid].y + in2[gid].y;
+}
+
 __global__ void complexAbsSum(double2 *in1, double2 *in2, double *out){
     int gid = getGid3d3d();
     double2 temp;

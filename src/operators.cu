@@ -2,8 +2,8 @@
 #include "../include/kernels.h"
 #include "../include/dynamic.h"
 
-void lapacian(Grid &par, double2 *data, double2* out, int xDim, int yDim,
-              int zDim, double dx, double dy, double dz){
+void laplacian(Grid &par, double2 *data, double2* out, int xDim, int yDim,
+               int zDim, double dx, double dy, double dz){
 
     dim3 grid = par.grid;
     dim3 threads = par.threads;
@@ -32,8 +32,8 @@ void lapacian(Grid &par, double2 *data, double2* out, int xDim, int yDim,
 
 }
 
-void lapacian(Grid &par, double2 *data, double2* out, int xDim, int yDim,
-              double dx, double dy){
+void laplacian(Grid &par, double2 *data, double2* out, int xDim, int yDim,
+               double dx, double dy){
 
 
     dim3 grid = par.grid;
@@ -54,6 +54,17 @@ void lapacian(Grid &par, double2 *data, double2* out, int xDim, int yDim,
     sum<<<grid, threads>>>(temp_derivative, out, out);
 
     cudaFree(temp_derivative);
+}
+
+void laplacian(Grid &par, double2 *data, double2* out, int xDim, double dx){
+
+    dim3 grid = par.grid;
+    dim3 threads = par.threads;
+    int gsize = xDim;
+
+    derive<<<grid, threads>>>(data, out, 1, gsize, dx);
+    derive<<<grid, threads>>>(out, out, 1, gsize, dx);
+
 }
 
 double sign(double x){

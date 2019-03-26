@@ -1182,6 +1182,8 @@ void evolve_test(){
     par.store("write_file", false);
     par.store("write_it", false);
     par.store("energy_calc", true);
+    par.store("corotating", true);
+    par.store("omega",0);
     par.store("box_size", 0.00007);
     par.store("xDim", 64);
     par.store("yDim", 1);

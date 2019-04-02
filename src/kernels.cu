@@ -461,6 +461,13 @@ __global__ void scalarMult(double* in, double factor, double* out){
     out[gid] = result;
 }
 
+__global__ void scalarMult(double2* in, double2 factor, double2* out){
+    double2 result;
+    unsigned int gid = getGid3d3d();
+    result.x = (in[gid].x * factor.x - in[gid].y*factor.y);
+    result.y = (in[gid].x * factor.y + in[gid].y*factor.x);
+    out[gid] = result;
+}
 
 /**
  * As above, but normalises for wfc

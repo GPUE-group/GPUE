@@ -395,7 +395,7 @@ __global__ void scalarDiv(double* in, double factor, double* out);
 * @brief        Complex field scaling and renormalisation. Used mainly post-FFT.
 * @ingroup      gpu
 * @param        in Complex field to be scaled (multiplied, not divided)
-* @param        factor Scaling factor to be used
+* @param        scaling factor to be used
 * @param        out Pass by reference output for result
 */
 __global__ void scalarMult(double2* in, double factor, double2* out);
@@ -404,10 +404,20 @@ __global__ void scalarMult(double2* in, double factor, double2* out);
 * @brief        field scaling and renormalisation. Used mainly post-FFT.
 * @ingroup      gpu
 * @param        in field to be scaled (multiplied, not divided)
-* @param        factor Scaling factor to be used
+* @param        scalaing factor to be used
 * @param        out Pass by reference output for result
 */
 __global__ void scalarMult(double* in, double factor, double* out);
+
+/**
+* @brief        Complex field scaling and renormalisation. Used mainly post-FFT.
+* @ingroup      gpu
+* @param        in Complex field to be scaled (multiplied, not divided)
+* @param        complex scaling factor to be used
+* @param        out Pass by reference output for result
+*/
+__global__ void scalarMult(double2* in, double2 factor, double2* out);
+
 
 /**
 * @brief        Complex field raised to a power

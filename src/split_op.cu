@@ -326,13 +326,12 @@ double energy_calc(Grid &par, double2* wfc){
     cMult<<<grid, threads>>>(wfc_c, energy_r, energy_r);
 
     energy_sum<<<grid, threads>>>(energy_r, energy_k, energy);
-    //zeros<<<grid, threads>>>(energy, energy);
+    //zeros<<<grid, threads>>>(energy);
 
     cudaFree(energy_r);
     cudaFree(energy_k);
 
     // Adding in angular momementum energy if -l flag is on
-/*
     if (corotating && dimnum > 1){
 
         double2 *energy_l, *dwfc;
@@ -374,13 +373,11 @@ double energy_calc(Grid &par, double2* wfc){
         energy_lsum<<<grid, threads>>>(energy, energy_l, energy);
         cudaFree(energy_l);
     }
-*/
 
     double *energy_cpu;
     energy_cpu = (double *)malloc(sizeof(double)*gsize);
 
     cudaMemcpy(energy_cpu, energy, sizeof(double)*gsize,
-    //cudaMemcpy(energy_cpu, energy_l, sizeof(double)*gsize,
                cudaMemcpyDeviceToHost);
 
     double sum = 0;

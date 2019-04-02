@@ -545,11 +545,11 @@ __device__ double2 im_ast(double val, double dt);
 * @brief        Sets boolean array to 0
 * @ingroup      gpu
 */
-__global__ void zeros(bool *in, bool *out);
+__global__ void zeros(bool *out);
 
-__global__ void zeros(double *in, double *out);
+__global__ void zeros(double *out);
 
-__global__ void zeros(double2 *in, double2 *out);
+__global__ void zeros(double2 *out);
 
 /**
 * @brief        Sets in2 to be equal to in1

@@ -65,46 +65,27 @@ function calculate_energy(wfc, H_k, H_r, Ax, Ay, g, xDim, yDim, dx, dy)
 
 end
 
-function calculate()
-    xDim = 256
-    yDim = 256
-    dx = 1.72817e-06
-    dy = 1.72817e-06
-    omega = 0.6
-    omegaX = 6.283
-    data_dir = "../data/"
+# Read in param.cfg file
+function calculate(param_file::String, data_dir::String)
+    parameters = Dict()
 
-    Ax = readdlm(data_dir*"Ax_0")
-    Ay = readdlm(data_dir*"Ay_0")
-    K = readdlm(data_dir*"K_0")
-    V = readdlm(data_dir*"V_0")
+    for line in readlines(data_dir*param_file)
+        if line != "[Params]"
+            tmp = split(line,"=")
+            parameters[tmp[1]] = tmp[2]
+        end
+    end
 
-    #wfc = readdlm("wfc_load") + readdlm("wfci_load")*im
-    wfc = readdlm("../data/wfc_0_const_50000") + readdlm("../data/wfc_0_consti_50000")*im
-    println("../data/wfc_0_const_50000", '\t', "../data/wfc_0_consti_50000")
+    xDim = parse(Int64, parameters["xDim"])
+    yDim = parse(Int64, parameters["yDim"])
+    dx = parse(Float64, parameters["dx"])
+    dy = parse(Float64, parameters["dy"])
 
-    Ax = reshape(Ax, xDim, yDim)
-    Ay = reshape(Ay, xDim, yDim)
-    #Ax /= omega*omegaX
-    #Ay /= omega*omegaX
-    K = reshape(K, xDim, yDim)
-    V = reshape(V, xDim, yDim)
-    wfc = reshape(wfc, xDim, yDim)
-    g = 6.80274e-41
+    omega = parse(Float64, parameters["omega"])
+    omegaX = parse(Float64, parameters["omegaX"])
 
-    calculate_energy(wfc, K, V, Ax, Ay, g, xDim, yDim, dx, dy)
+    g = parse(Float64, parameters["gDenConst"])
 
-end
-
-function calculate_range(start::Int64, incr::Int64, final::Int64)
-
-    xDim = 256
-    yDim = 256
-    dx = 1.72817e-06
-    dy = 1.72817e-06
-    omega = 0.6
-    omegaX = 6.283
-    data_dir = "../data/"
     Ax = readdlm(data_dir*"Ax_0")
     Ay = readdlm(data_dir*"Ay_0")
     K = readdlm(data_dir*"K_0")
@@ -114,17 +95,40 @@ function calculate_range(start::Int64, incr::Int64, final::Int64)
     Ay = reshape(Ay, xDim, yDim)
     K = reshape(K, xDim, yDim)
     V = reshape(V, xDim, yDim)
-    g = 6.80274e-41
 
-    for i = start:incr:final
+    start = 0
+    ende = parse(Int64, parameters["esteps"])
+    endg = parse(Int64, parameters["gsteps"])
+    incr = parse(Int64, parameters["printSteps"])
+
+    # Ground State Evolution
+    println("Starting imaginary time energy calculation")
+    for i = start:incr:endg
         wfc = readdlm(data_dir*"wfc_0_const_"*string(i)) +
               readdlm(data_dir*"wfc_0_consti_"*string(i))*im
-        println(data_dir*"wfc_0_const_"*string(i), '\t', data_dir*"wfc_0_consti_"*string(i))
+        println(data_dir*"wfc_0_const_"*string(i), '\t',
+                data_dir*"wfc_0_consti_"*string(i))
         wfc = reshape(wfc, xDim, yDim)
         calculate_energy(wfc, K, V, Ax, Ay, g, xDim, yDim, dx, dy)
         println()
     end
+
+    println()
+
+    # Ground State Evolution
+    println("Starting real time energy calculation")
+    for i = start:incr:ende
+        wfc = readdlm(data_dir*"wfc_ev_"*string(i)) +
+              readdlm(data_dir*"wfc_evi_"*string(i))*im
+        println(data_dir*"wfc_0_const_"*string(i), '\t', 
+                data_dir*"wfc_0_consti_"*string(i))
+        wfc = reshape(wfc, xDim, yDim)
+        calculate_energy(wfc, K, V, Ax, Ay, g, xDim, yDim, dx, dy)
+        println()
+    end
+
+
 end
 
-#calculate()
-calculate_range(0, 5000, 50000)
+calculate("Params.dat", "../data/")
+

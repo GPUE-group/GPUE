@@ -48,7 +48,7 @@ Grid parseArgs(int argc, char** argv){
     par.store("write_file", true);
     par.store("fudge", 0.0);
     par.store("kill_idx", -1);
-    par.store("mask_2d", 1.5e-4);
+    par.store("mask_2d", 0.0);
     par.store("box_size", -0.01);
     par.store("found_sobel", false);
     par.store("energy_calc", false);

@@ -1006,7 +1006,7 @@ __global__ void kstd_wfc(double *x, double *y, double *z, double *items,
     int yid = blockDim.y*blockIdx.y + threadIdx.y;
     int zid = blockDim.z*blockIdx.z + threadIdx.z;
 
-    phi[gid] = fmod(winding*atan2(y[yid], x[xid]),2*PI);
+    phi[gid] = -fmod(winding*atan2(y[yid], x[xid]),2*PI);
 
     wfc[gid].x = exp(-(x[xid]*x[xid]/(items[14]*items[14]*items[15]*items[15]) 
                      + y[yid]*y[yid]/(items[14]*items[14]*items[16]*items[16]) 

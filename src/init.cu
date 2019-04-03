@@ -59,7 +59,7 @@ int init(Grid &par){
     double omegaY = par.dval("omegaY");
     double omegaZ = par.dval("omegaZ");
     double gammaY = par.dval("gammaY"); //Aspect ratio of trapping geometry.
-    double l = par.dval("winding");
+    double winding = par.dval("winding");
     double box_size = par.dval("box_size");
     double *Energy;
     double *r;

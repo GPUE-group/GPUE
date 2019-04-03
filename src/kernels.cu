@@ -41,11 +41,13 @@ __device__ unsigned int getGid3d3d(){
 __global__ void derive(double *data, double *out, int stride, int gsize,
                        double dx){
     int gid = getGid3d3d();
-    if (gid + stride < gsize){
-        out[gid] = (data[gid+stride] - data[gid])/dx;
-    }
-    else{
-        out[gid] = data[gid]/dx;
+    if (gid < gsize){
+        if (gid + stride < gsize){
+            out[gid] = (data[gid+stride] - data[gid])/dx;
+        }
+        else{
+            out[gid] = data[gid]/dx;
+        }
     }
 }
 
@@ -56,13 +58,15 @@ __global__ void derive(double *data, double *out, int stride, int gsize,
 __global__ void derive(double2 *data, double2 *out, int stride, int gsize,
                        double dx){
     int gid = getGid3d3d();
-    if (gid + stride < gsize){
-        out[gid].x = (data[gid+stride].x - data[gid].x)/dx;
-        out[gid].y = (data[gid+stride].y - data[gid].y)/dx;
-    }
-    else{
-        out[gid].x = data[gid].x/dx;
-        out[gid].y = data[gid].y/dx;
+    if (gid < gsize){
+        if (gid + stride < gsize){
+            out[gid].x = (data[gid+stride].x - data[gid].x)/dx;
+            out[gid].y = (data[gid+stride].y - data[gid].y)/dx;
+        }
+        else{
+            out[gid].x = data[gid].x/dx;
+            out[gid].y = data[gid].y/dx;
+        }
     }
 }
 

@@ -1198,7 +1198,7 @@ void evolve_test(){
     // Setting default values
     Grid par;
 
-    int res = 64;
+    int res = 32;
     par.store("omega", 0.0);
     par.store("gammaY", 1.0);
     par.store("device", 0);
@@ -1255,7 +1255,7 @@ void evolve_test(){
     par.store("write_it", false);
     par.store("energy_calc", true);
     par.store("corotating", true);
-    par.store("omega",0);
+    par.store("omega",0.0);
     par.store("box_size", 0.00007);
     par.store("xDim", res);
     par.store("yDim", 1);
@@ -1438,9 +1438,11 @@ void cMultPhi_test(){
 // Test for available amount of GPU memory
 void check_memory_test(){
     Grid par;
-    par.store("xDim",100);
-    par.store("yDim",100);
-    par.store("zDim",100);
+    par.store("xDim",10);
+    par.store("yDim",10);
+    par.store("zDim",10);
+
+    par.store("energy_calc",true);
 
     check_memory(par);
 

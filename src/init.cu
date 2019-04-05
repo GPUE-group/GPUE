@@ -61,7 +61,6 @@ int init(Grid &par){
     if (dimnum > 2){
         gSize *= zDim;
     }
-    double omega = par.dval("omega");
     double gdt = par.dval("gdt");
     double dt = par.dval("dt");
     double omegaX = par.dval("omegaX");

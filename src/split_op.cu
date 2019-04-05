@@ -1,4 +1,3 @@
-
 #include "../include/split_op.h"
 #include "../include/kernels.h"
 #include "../include/constants.h"
@@ -336,10 +335,11 @@ double energy_calc(Grid &par, double2* wfc){
 
         double2 *energy_l, *dwfc;
         double *A;
+        double *check;
+        check = (double *)malloc(sizeof(double)*10);
 
         cudaMalloc((void **) &energy_l, sizeof(double2)*gsize);
         cudaMalloc((void **) &dwfc, sizeof(double2)*gsize);
-        cudaMalloc((void **) &A, sizeof(double)*gsize);
 
         A = par.dsval("Ax_gpu");
 
@@ -363,7 +363,6 @@ double energy_calc(Grid &par, double2* wfc){
 
         }
 
-        cudaFree(A);
         cudaFree(dwfc);
 
         double2 scale = {0, HBAR};

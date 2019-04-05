@@ -131,4 +131,3 @@ function calculate(param_file::String, data_dir::String)
 end
 
 calculate("Params.dat", "../data/")
-

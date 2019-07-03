@@ -1245,8 +1245,8 @@ void evolve_test(){
 
     double thresh = 0.01;
     std::string buffer;
-    int gsteps = 24001;
-    int esteps = 24001;
+    int gsteps = 30001;
+    int esteps = 30001;
 
     par.store("gdt", 1e-4);
     par.store("dt", 1e-4);
@@ -1256,7 +1256,7 @@ void evolve_test(){
     par.store("omegaY", 1.0);
     par.store("esteps", esteps);
     par.store("gsteps", gsteps);
-    par.store("printSteps", 24000);
+    par.store("printSteps", 30000);
     par.store("write_file", false);
     par.store("write_it", true);
     par.store("energy_calc", true);

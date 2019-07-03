@@ -834,7 +834,7 @@ void evolve(Grid &par,
             }
             par.store("energy", energy);
 
-            if (i != 0 && fabs(oldEnergy - energy) < energy_calc_threshold * oldEnergy) {
+            if (i != 0 && fabs(oldEnergy - energy) < energy_calc_threshold * oldEnergy && gstate == 0) {
                 printf("Stopping early at step %d with energy %E\n", i, energy);
                 break;
             }

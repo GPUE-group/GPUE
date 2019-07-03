@@ -394,8 +394,6 @@ void evolve(Grid &par,
         if(i % printSteps == 0) {
             // If the unit_test flag is on, we need a special case
             printf("Step: %d    Omega: %lf\n", i, omega_0);
-            cudaMemcpy(wfc, gpuWfc, sizeof(cufftDoubleComplex)*xDim*yDim*zDim, 
-                       cudaMemcpyDeviceToHost);
 
             // Printing out time of iteration
             end = clock();
@@ -838,10 +836,12 @@ void evolve(Grid &par,
 
             if (i != 0 && fabs(oldEnergy - energy) < energy_calc_threshold * oldEnergy) {
                 printf("Stopping early at step %d with energy %E\n", i, energy);
-                //break;
+                break;
             }
         }
     }
+
+    cudaMemcpy(wfc, gpuWfc, sizeof(cufftDoubleComplex)*xDim*yDim*zDim, cudaMemcpyDeviceToHost);
 
     par.store("wfc", wfc);
     par.store("wfc_gpu", gpuWfc);

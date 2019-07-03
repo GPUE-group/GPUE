@@ -12,9 +12,9 @@ Options:
 -c 2            Set coords (1, 2, 3 dimensions)
 -D 0.0          Set's offset for kill (-K flag) distance radially
 -d data         Set data directory - where to store / read data (here in data/)
--E 0.0001 123   Perform energy calculations, exiting early if the change in energy is sufficiently small.
-                    If no arguments are given, the calculation is performed as often as the printSteps.
-                    Otherwise the threshold for cutoff and frequency of calculation must be given, in that order.
+-E 0.0001 123   Perform energy calculations, exit groundstate simulations early
+                    The calculation frequency defaults to printSteps.
+                    Otherwise the threshold and frequency must be given.
 -e 1            Set esteps, number of real-time evolution steps
 -f              Unset write to file flag
 -G 1            Set GammaY, ratio of omega_y to omega_x

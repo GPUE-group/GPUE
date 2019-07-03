@@ -52,6 +52,8 @@ Grid parseArgs(int argc, char** argv){
     par.store("box_size", -0.01);
     par.store("found_sobel", false);
     par.store("energy_calc", false);
+    par.store("energy_calc_steps", 0);
+    par.store("energy_calc_threshold", -1.0);
     par.store("use_param_file", false);
     par.store("param_file","param.cfg");
     par.store("cyl_coord",false);
@@ -67,7 +69,7 @@ Grid parseArgs(int argc, char** argv){
     optind = 1;
 
     while ((opt = getopt (argc, argv, 
-           "b:d:D:C:x:y:w:m:G:g:e:T:t:n:p:rQ:L:Elsi:P:X:Y:O:k:WU:V:S:ahz:H:uA:v:Z:fc:F:K:R:q:I:j:J;")) !=-1)
+           "b:d:D:C:x:y:w:m:G:g:e:T:t:n:p:rQ:L:E::lsi:P:X:Y:O:k:WU:V:S:ahz:H:uA:v:Z:fc:F:K:R:q:I:j:J;")) !=-1)
     {
         switch (opt)
         {
@@ -76,7 +78,6 @@ Grid parseArgs(int argc, char** argv){
                 int xDim = atoi(optarg);
                 printf("Argument for x is given as %d\n",xDim);
                 par.store("xDim",(int)xDim);
-                break;
             }
             case 'b':
             {
@@ -228,8 +229,20 @@ Grid parseArgs(int argc, char** argv){
             }
             case 'E':
             {
-                printf("Printing energy calculation\n");
-                par.store("energy_calc",true);
+                if (optind >= argc || argv[optind][0] == '-') {
+                    printf("Energy tag set but no options given!\n");
+                } else {
+                    double threshold = atof(argv[optind]);
+                    int steps = atoi(argv[optind + 1]);
+
+                    printf("Calculating energy every %d steps, stopping if difference ratio is less than %E\n", steps, threshold);
+                    par.store("energy_calc",true);
+                    par.store("energy_calc_steps", steps);
+                    par.store("energy_calc_threshold", threshold);
+
+                    optind++;
+                }
+                par.store("energy_calc", true);
                 break;
             }
             case 'f':

@@ -1042,6 +1042,9 @@ void parser_test(){
     assert(noarg_grid.dval("gammaY") == 1.0);
     assert(noarg_grid.ival("gsteps") == 1);
     assert(noarg_grid.ival("esteps") == 1);
+    assert(noarg_grid.bval("energy_calc") == false);
+    assert(noarg_grid.ival("energy_calc_steps") == 0);
+    assert(noarg_grid.dval("energy_calc_threshold") == -1);
     assert(noarg_grid.dval("gdt") == 1e-4);
     assert(noarg_grid.dval("dt") == 1e-4);
     assert(noarg_grid.ival("device") == 0);
@@ -1089,51 +1092,51 @@ void parser_test(){
 
     // I apologize for the mess... If you have a better way of creating the 
     // char ** for this without running into memory issues, let me know!
-    char *fake_fullargv[] = {strdup("./gpue"), 
-                             strdup("-A"), strdup("rotation"), 
-                             strdup("-a"),
-                             strdup("-b"), strdup("2.5e-5"), 
-                             strdup("-C"), strdup("0"), 
-                             strdup("-c"), strdup("3"), 
-                             strdup("-D"), strdup("data"), 
-                             strdup("-E"), 
-                             strdup("-e"), strdup("1"), 
-                             strdup("-f"), 
-                             strdup("-G"), strdup("1"),
-                             strdup("-g"), strdup("1"), 
-                             strdup("-i"), strdup("1"), 
-                             strdup("-K"), strdup("0"), 
-                             strdup("-k"), strdup("0"),
-                             strdup("-L"), strdup("0"), 
-                             strdup("-l"), 
-                             strdup("-n"), strdup("1"), 
-                             strdup("-O"), strdup("0"),
-                             strdup("-P"), strdup("0"), 
-                             strdup("-p"), strdup("100"),
-                             strdup("-Q"), strdup("0"), 
-                             strdup("-q"), strdup("0"), 
-                             strdup("-R"), strdup("1"), 
-                             //strdup("-r"),
-                             strdup("-S"), strdup("0"), 
-                             strdup("-s"),
-                             strdup("-T"), strdup("1e-4"), 
-                             strdup("-t"), strdup("1e-4"), 
-                             strdup("-U"), strdup("0"), 
-                             strdup("-V"), strdup("0"), 
-                             strdup("-W"), 
-                             strdup("-w"), strdup("0"), 
-                             strdup("-X"), strdup("1.0"),
-                             strdup("-x"), strdup("256"), 
-                             strdup("-Y"), strdup("1.0"), 
-                             strdup("-y"), strdup("256"),
-                             strdup("-Z"), strdup("6.283"), 
-                             strdup("-z"), strdup("256"), 
+    const char *fake_fullargv[] = {"./gpue", 
+                             "-A", "rotation", 
+                             "-a",
+                             "-b", "2.5e-5", 
+                             "-C", "0", 
+                             "-c", "3", 
+                             "-D", "data", 
+                             "-E", "0.001", "100",
+                             "-e", "1", 
+                             "-f", 
+                             "-G", "1",
+                             "-g", "1", 
+                             "-i", "1", 
+                             "-K", "0", 
+                             "-k", "0",
+                             "-L", "0", 
+                             "-l", 
+                             "-n", "1", 
+                             "-O", "0",
+                             "-P", "0", 
+                             "-p", "100",
+                             "-Q", "0", 
+                             "-q", "0", 
+                             "-R", "1", 
+                             //"-r",
+                             "-S", "0", 
+                             "-s",
+                             "-T", "1e-4", 
+                             "-t", "1e-4", 
+                             "-U", "0", 
+                             "-V", "0", 
+                             "-W", 
+                             "-w", "0", 
+                             "-X", "1.0",
+                             "-x", "256", 
+                             "-Y", "1.0", 
+                             "-y", "256",
+                             "-Z", "6.283", 
+                             "-z", "256", 
                              NULL};
     int fake_argc = sizeof(fake_fullargv) / sizeof(char *) - 1;
 
     // Now to read into gpue and see what happens
     Grid fullarg_grid;
-    fullarg_grid = parseArgs(fake_argc, fake_fullargv);
+    fullarg_grid = parseArgs(fake_argc, (char **)fake_fullargv);
 
     // Checking contents of fullarg_grid:
     assert(fullarg_grid.ival("xDim") == 256);
@@ -1143,6 +1146,9 @@ void parser_test(){
     assert(fullarg_grid.dval("gammaY") == 1.0);
     assert(fullarg_grid.ival("gsteps") == 1);
     assert(fullarg_grid.ival("esteps") == 1);
+    assert(fullarg_grid.bval("energy_calc") == true);
+    assert(fullarg_grid.ival("energy_calc_steps") == 100);
+    assert(fullarg_grid.dval("energy_calc_threshold") == 0.001);
     assert(fullarg_grid.dval("gdt") == 1e-4);
     assert(fullarg_grid.dval("dt") == 1e-4);
     assert(fullarg_grid.ival("device") == 0);
@@ -1252,16 +1258,16 @@ void evolve_test(){
     par.store("gsteps", gsteps);
     par.store("printSteps", 30000);
     par.store("write_file", false);
-    par.store("write_it", false);
+    par.store("write_it", true);
     par.store("energy_calc", true);
+    par.store("energy_calc_steps", 1000);
+    par.store("energy_calc_threshold", 0.0001);
     par.store("corotating", true);
     par.store("omega",0.0);
     par.store("box_size", 0.00007);
     par.store("xDim", res);
     par.store("yDim", 1);
     par.store("zDim", 1);
-
-
 
     // Running through all the dimensions to check the energy
     for (int i = 1; i <= 3; ++i){
@@ -1291,7 +1297,7 @@ void evolve_test(){
 
         if (abs(energy - energy_check) > thresh*energy_check){
             std::cout << "Energy is not correct in imaginary-time for " 
-                      << i << "D!\n";
+                      << i << "D! Expected " << energy_check << " but received " << energy << "\n";
             assert(energy == energy_check);
         }
 
@@ -1302,7 +1308,7 @@ void evolve_test(){
 
         if (abs(energy - energy_ev) > thresh*energy_check){
             std::cout << "Energy is not constant in real-time for " 
-                      << i << "D!\n";
+                      << i << "D! Expected " << energy_ev << " but received " << energy << "\n";
             assert(energy == energy_ev);
         }
     }

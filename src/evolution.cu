@@ -252,6 +252,8 @@ void evolve(Grid &par,
     bool graph = par.bval("graph");
     int N = par.ival("atoms");
     int printSteps = par.ival("printSteps");
+    int energy_calc_steps = par.ival("energy_calc_steps");
+    double energy_calc_threshold = par.dval("energy_calc_threshold");
     bool nonlin = par.bval("gpe");
     bool lz = par.bval("corotating");
     bool ramp = par.bval("ramp");
@@ -311,10 +313,6 @@ void evolve(Grid &par,
     }
     begin = clock();
     double omega_0=omega*omegaX;
-
-    // ** ############################################################## ** //
-    // **         HERE BE DRAGONS OF THE MOST DANGEROUS KIND!            ** //
-    // ** ############################################################## ** //
 
     // 2D VORTEX TRACKING
 
@@ -682,35 +680,8 @@ void evolve(Grid &par,
                                  wfc, xDim*yDim*zDim, i);
             }
             //std::cout << "written" << '\n';
-            if (par.bval("energy_calc")){
-                par.store("time", time);
-                double energy = energy_calc(par,gpuWfc);
-                // Now opening and closing file for writing.
-                std::ofstream energy_out;
-                std::string mode = "energyi.dat";
-                if (gstate == 1){
-                    mode = "energy.dat";
-                }
-                if (i == 0){
-                    energy_out.open(data_dir + mode);
-                }
-                else{
-                    energy_out.open(data_dir + mode, std::ios::out |
-                                                     std::ios::app);
-                }
-                energy_out << energy << '\n';
-                energy_out.close();
-                printf("Energy[t@%d]=%E\n",i,energy);
-                par.store("energy", energy);
-            }
-
         }
-
         // No longer writing out
-
-        // ** ########################################################## ** //
-        // **                     More F'n' Dragons!                     ** //
-        // ** ########################################################## ** //
 
         // U_r(dt/2)*wfc
         if(nonlin == 1){
@@ -836,6 +807,39 @@ void evolve(Grid &par,
 
         if(gstate==0){
             parSum(gpuWfc, par);
+        }
+
+        if (par.bval("energy_calc") && (i % (energy_calc_steps == 0 ? printSteps : energy_calc_steps) == 0)) {
+            double energy = energy_calc(par, gpuWfc);
+
+            printf("Energy[t@%d]=%E\n",i,energy);
+            std::ofstream energy_out;
+            std::string mode = "energyi.dat";
+            if (gstate == 1){
+                mode = "energy.dat";
+            }
+            if (i == 0){
+                energy_out.open(data_dir + mode);
+            }
+            else{
+                energy_out.open(data_dir + mode, std::ios::out |
+                                                 std::ios::app);
+            }
+            energy_out << energy << '\n';
+            energy_out.close();
+            
+            double oldEnergy;
+            if (i != 0) {
+                oldEnergy = par.dval("energy");
+            } else {
+                oldEnergy = 0;
+            }
+            par.store("energy", energy);
+
+            if (i != 0 && fabs(oldEnergy - energy) < energy_calc_threshold * oldEnergy) {
+                printf("Stopping early at step %d with energy %E\n", i, energy);
+                //break;
+            }
         }
     }
 

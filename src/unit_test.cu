@@ -194,7 +194,7 @@ void math_operator_test(){
 
     std::cout << "Now testing the derive() kernels...\n";
     // Now testing the derive function
-    int dim = 4;
+    unsigned int dim = 4;
     double2 *darray, *darray_gpu, *darray_out;
     darray = (double2 *)malloc(sizeof(double2)*dim*dim*dim);
     cudaMalloc((void**) &darray_gpu, sizeof(double2)*dim*dim*dim);
@@ -565,7 +565,7 @@ void fft_test(){
     err = cudaMemcpy(gpu_array, array, sizeof(double2)*gsize,
                      cudaMemcpyHostToDevice);
     if (err != cudaSuccess){
-        std::cout << "Could not coppy array to device!" << '\n';
+        std::cout << "Could not copy array to device!" << '\n';
         std::cout << "error code: " << err << '\n';
         exit(1);
     }
@@ -581,7 +581,7 @@ void fft_test(){
     err = cudaMemcpy(array, gpu_array, sizeof(double2)*gsize, 
                      cudaMemcpyDeviceToHost);
     if (err != cudaSuccess){
-        std::cout << "Could not coppy gpu_array to host!" << '\n';
+        std::cout << "Could not copy gpu_array to host!" << '\n';
         std::cout << "error code: " << err << '\n';
         exit(1);
     }
@@ -604,7 +604,7 @@ void fft_test(){
     err = cudaMemcpy(array, gpu_array, sizeof(double2)*gsize, 
                      cudaMemcpyDeviceToHost);
     if (err != cudaSuccess){
-        std::cout << "Could not coppy gpu_array to host!" << '\n';
+        std::cout << "Could not copy gpu_array to host!" << '\n';
         std::cout << "error code: " << err << '\n';
         exit(1);
     }
@@ -1260,7 +1260,7 @@ void evolve_test(){
     par.store("write_file", false);
     par.store("write_it", true);
     par.store("energy_calc", true);
-    par.store("energy_calc_steps", 1000);
+    par.store("energy_calc_steps", 2000);
     par.store("energy_calc_threshold", 0.0001);
     par.store("corotating", true);
     par.store("omega",0.0);

@@ -33,8 +33,8 @@ namespace Tracker {
     [[deprecated]]
     int findOLMaxima(int *marker, double *Vopt, double radius, int xDim, double* x){
         double gridValues[9];
-        int2 mIndex[1024];
-        int2 index;
+        // int2 mIndex[1024];
+        // int2 index;
         int i,j,found;
         found=0;
         for (i=1; i<xDim-1; ++i ){
@@ -52,9 +52,9 @@ namespace Tracker {
                     if(fabs((gridValues[4]-Minions::maxValue(gridValues,9))/gridValues[4]) <= 1e-7){
                         //printf ("%d,%d\n",i,j);
                         (marker)[i*xDim + j] = 1;
-                        index.x=i;
-                        index.y=j;
-                        mIndex[found] = index;
+                        // index.x=i;
+                        // index.y=j;
+                        // mIndex[found] = index;
                         ++found;
                     }
                 }
@@ -216,7 +216,7 @@ namespace Tracker {
      */
     void vortPos(const int *marker, std::vector<std::shared_ptr<Vtx::Vortex> > &vLocation, int xDim, const double2 *wfc){
         int i,j;
-        unsigned int counter=0;
+        // unsigned int counter=0;
 
         int2 coords; double2 coordsD;
         coords.x=0; coords.y = 0;
@@ -227,7 +227,7 @@ namespace Tracker {
                 if( abs((marker)[i*xDim + j]) >= 1){
                     coords.x = i; coords.y = j;
                     vLocation.push_back(std::make_shared<Vtx::Vortex>(coords, coordsD, marker[i*xDim + j], false, 0));
-                    //++counter;
+                    // ++counter;
                 }
             }
         }

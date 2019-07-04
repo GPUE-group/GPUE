@@ -574,6 +574,10 @@ void fft_test(){
     for (int i = 0; i < yDim; i++){
         result = cufftExecZ2Z(plan_y, &gpu_array[i*xDim*yDim], 
                                       &gpu_array[i*xDim*yDim], CUFFT_FORWARD);
+        if (result != CUFFT_SUCCESS) {
+            std::cout << "Could not execute plan!\n cuFFT error code: " << result << '\n';
+            exit(1);
+        }
     }
     //result = cufftExecZ2Z(plan_z, gpu_array, gpu_array, CUFFT_FORWARD);
 
@@ -597,6 +601,10 @@ void fft_test(){
     for (int i = 0; i < yDim; i++){
         result = cufftExecZ2Z(plan_y, &gpu_array[i*xDim*yDim], 
                                       &gpu_array[i*xDim*yDim], CUFFT_INVERSE);
+        if (result != CUFFT_SUCCESS) {
+            std::cout << "Could not execute plan!\n cuFFT error code: " << result << '\n';
+            exit(1); 
+        }
     }
     //result = cufftExecZ2Z(plan_z, gpu_array, gpu_array, CUFFT_INVERSE);
 
@@ -694,8 +702,6 @@ void grid_test2d(){
         assert(block.y == par.threads.y);
         assert(block.z == par.threads.z);
     }
-
-    int total_threads = block.x * block.y * block.z;
 
     // Now we need to initialize our double * and send it to the gpu
     double *host_array, *device_array;
@@ -810,9 +816,6 @@ void grid_test3d(){
         assert(block.z == par.threads.z);
     }
 
-
-    int total_threads = block.x * block.y * block.z;
-
     // Now we need to initialize our double * and send it to the gpu
     double *host_array, *device_array;
     host_array = (double *) malloc(sizeof(double)*gsize);
@@ -868,7 +871,6 @@ void parSum_test(){
 
     // For now, we will assume an 64x64 array for summing
     dim3 threads(16, 1, 1);
-    int total_threads = threads.x*threads.y*threads.z;
 
     double dx = 0.1;
     double dy = 0.1;
@@ -892,10 +894,8 @@ void parSum_test(){
     par.grid = grid;
 
     // now we need to initialize the wfc to all 1's;
-    double2 *wfc, *host_sum;
+    double2 *wfc;
     wfc = (cufftDoubleComplex *) malloc(sizeof(cufftDoubleComplex) * gsize);
-    host_sum = (cufftDoubleComplex *) 
-               malloc(sizeof(cufftDoubleComplex) * gsize / total_threads);
 
     // init wfc
     for (int i = 0; i < gsize; i++){

@@ -9,14 +9,13 @@ void apply_gauge(Grid &par, double2 *wfc, double2 *Ax, double2 *Ay,
                  cufftHandle plan_dim3, double dx, double dy, double dz,
                  double time, int yDim, int size){
 
-    cufftResult result;
     dim3 grid = par.grid;
     dim3 threads = par.threads;
 
     if (flip){
 
         // 1d forward / mult by Az
-        result = cufftExecZ2Z(plan_1d, wfc, wfc, CUFFT_FORWARD);
+        cufftExecZ2Z(plan_1d, wfc, wfc, CUFFT_FORWARD);
         scalarMult<<<grid,threads>>>(wfc, renorm_factor_z, wfc);
         if(par.bval("Ax_time")){
             EqnNode_gpu* Ax_eqn = par.astval("Ax");
@@ -27,13 +26,13 @@ void apply_gauge(Grid &par, double2 *wfc, double2 *Ax, double2 *Ay,
         else{
             cMult<<<grid,threads>>>(wfc, (cufftDoubleComplex*) Ax, wfc);
         }
-        result = cufftExecZ2Z(plan_1d, wfc, wfc, CUFFT_INVERSE);
+        cufftExecZ2Z(plan_1d, wfc, wfc, CUFFT_INVERSE);
         scalarMult<<<grid,threads>>>(wfc, renorm_factor_z, wfc);
 
         // loop to multiply by Ay
         for (int i = 0; i < yDim; i++){
-            result = cufftExecZ2Z(plan_dim2,  &wfc[i*size],
-                     &wfc[i*size], CUFFT_FORWARD);
+            cufftExecZ2Z(plan_dim2,  &wfc[i*size],
+                         &wfc[i*size], CUFFT_FORWARD);
         }
 
         scalarMult<<<grid,threads>>>(wfc, renorm_factor_y, wfc);
@@ -49,13 +48,13 @@ void apply_gauge(Grid &par, double2 *wfc, double2 *Ax, double2 *Ay,
 
         for (int i = 0; i < yDim; i++){
             //size = xDim * zDim;
-            result = cufftExecZ2Z(plan_dim2, &wfc[i*size],
-                     &wfc[i*size], CUFFT_INVERSE);
+            cufftExecZ2Z(plan_dim2, &wfc[i*size],
+                         &wfc[i*size], CUFFT_INVERSE);
         }
         scalarMult<<<grid,threads>>>(wfc, renorm_factor_y, wfc);
 
         // 1D FFT to Ax
-        result = cufftExecZ2Z(plan_dim3, wfc, wfc, CUFFT_FORWARD);
+        cufftExecZ2Z(plan_dim3, wfc, wfc, CUFFT_FORWARD);
         scalarMult<<<grid,threads>>>(wfc, renorm_factor_x, wfc);
 
         if(par.bval("Az_time")){
@@ -68,14 +67,14 @@ void apply_gauge(Grid &par, double2 *wfc, double2 *Ax, double2 *Ay,
             cMult<<<grid,threads>>>(wfc, (cufftDoubleComplex*) Az, wfc);
         }
 
-        result = cufftExecZ2Z(plan_dim3, wfc, wfc, CUFFT_INVERSE);
+        cufftExecZ2Z(plan_dim3, wfc, wfc, CUFFT_INVERSE);
         scalarMult<<<grid,threads>>>(wfc, renorm_factor_x, wfc);
 
     }
     else{
 
         // 1D FFT to Ax
-        result = cufftExecZ2Z(plan_dim3, wfc, wfc, CUFFT_FORWARD);
+        cufftExecZ2Z(plan_dim3, wfc, wfc, CUFFT_FORWARD);
         scalarMult<<<grid,threads>>>(wfc, renorm_factor_x, wfc);
 
         if(par.bval("Az_time")){
@@ -88,14 +87,14 @@ void apply_gauge(Grid &par, double2 *wfc, double2 *Ax, double2 *Ay,
             cMult<<<grid,threads>>>(wfc, (cufftDoubleComplex*) Az, wfc);
         }
 
-        result = cufftExecZ2Z(plan_dim3, wfc, wfc, CUFFT_INVERSE);
+        cufftExecZ2Z(plan_dim3, wfc, wfc, CUFFT_INVERSE);
         scalarMult<<<grid,threads>>>(wfc, renorm_factor_x, wfc);
 
 
         // loop to multiply by Ay
         for (int i = 0; i < yDim; i++){
-            result = cufftExecZ2Z(plan_dim2,  &wfc[i*size],
-                     &wfc[i*size], CUFFT_FORWARD);
+            cufftExecZ2Z(plan_dim2,  &wfc[i*size],
+                         &wfc[i*size], CUFFT_FORWARD);
         }
 
         scalarMult<<<grid,threads>>>(wfc, renorm_factor_y, wfc);
@@ -111,13 +110,13 @@ void apply_gauge(Grid &par, double2 *wfc, double2 *Ax, double2 *Ay,
 
         for (int i = 0; i < yDim; i++){
             //size = xDim * zDim;
-            result = cufftExecZ2Z(plan_dim2, &wfc[i*size],
-                     &wfc[i*size], CUFFT_INVERSE);
+            cufftExecZ2Z(plan_dim2, &wfc[i*size],
+                         &wfc[i*size], CUFFT_INVERSE);
         }
         scalarMult<<<grid,threads>>>(wfc, renorm_factor_y, wfc);
 
         // 1d forward / mult by Az
-        result = cufftExecZ2Z(plan_1d, wfc, wfc, CUFFT_FORWARD);
+        cufftExecZ2Z(plan_1d, wfc, wfc, CUFFT_FORWARD);
         scalarMult<<<grid,threads>>>(wfc, renorm_factor_z, wfc);
         if(par.bval("Ax_time")){
             EqnNode_gpu* Ax_eqn = par.astval("Ax");
@@ -128,7 +127,7 @@ void apply_gauge(Grid &par, double2 *wfc, double2 *Ax, double2 *Ay,
         else{
             cMult<<<grid,threads>>>(wfc, (cufftDoubleComplex*) Ax, wfc);
         }
-        result = cufftExecZ2Z(plan_1d, wfc, wfc, CUFFT_INVERSE);
+        cufftExecZ2Z(plan_1d, wfc, wfc, CUFFT_INVERSE);
         scalarMult<<<grid,threads>>>(wfc, renorm_factor_z, wfc);
 
     }
@@ -141,14 +140,13 @@ void apply_gauge(Grid &par, double2 *wfc, double2 *Ax, double2 *Ay,
                  cufftHandle plan_1d, cufftHandle plan_dim2, double dx,
                  double dy, double dz, double time){
 
-    cufftResult result;
     dim3 grid = par.grid;
     dim3 threads = par.threads;
 
     if (flip){
 
         // 1d forward / mult by Ay
-        result = cufftExecZ2Z(plan_1d, wfc, wfc, CUFFT_FORWARD);
+        cufftExecZ2Z(plan_1d, wfc, wfc, CUFFT_FORWARD);
         scalarMult<<<grid,threads>>>(wfc, renorm_factor_y ,wfc);
         if(par.bval("Ay_time")){
             EqnNode_gpu* Ay_eqn = par.astval("Ay");
@@ -159,12 +157,12 @@ void apply_gauge(Grid &par, double2 *wfc, double2 *Ax, double2 *Ay,
         else{
             cMult<<<grid,threads>>>(wfc, (cufftDoubleComplex*) Ay, wfc);
         }
-        result = cufftExecZ2Z(plan_1d, wfc, wfc, CUFFT_INVERSE);
+        cufftExecZ2Z(plan_1d, wfc, wfc, CUFFT_INVERSE);
         scalarMult<<<grid,threads>>>(wfc, renorm_factor_y, wfc);
 
 
         // 1D FFT to wfc_pAx
-        result = cufftExecZ2Z(plan_dim2, wfc, wfc, CUFFT_FORWARD);
+        cufftExecZ2Z(plan_dim2, wfc, wfc, CUFFT_FORWARD);
         scalarMult<<<grid,threads>>>(wfc, renorm_factor_x, wfc);
         if(par.bval("Ax_time")){
             EqnNode_gpu* Ax_eqn = par.astval("Ax");
@@ -176,13 +174,13 @@ void apply_gauge(Grid &par, double2 *wfc, double2 *Ax, double2 *Ay,
             cMult<<<grid,threads>>>(wfc, (cufftDoubleComplex*) Ax, wfc);
         }
 
-        result = cufftExecZ2Z(plan_dim2, wfc, wfc, CUFFT_INVERSE);
+        cufftExecZ2Z(plan_dim2, wfc, wfc, CUFFT_INVERSE);
         scalarMult<<<grid,threads>>>(wfc, renorm_factor_x, wfc);
     }
     else{
 
         // 1D FFT to wfc_pAx
-        result = cufftExecZ2Z(plan_dim2, wfc, wfc, CUFFT_FORWARD);
+        cufftExecZ2Z(plan_dim2, wfc, wfc, CUFFT_FORWARD);
         scalarMult<<<grid,threads>>>(wfc, renorm_factor_x, wfc);
         if(par.bval("Ax_time")){
             EqnNode_gpu* Ax_eqn = par.astval("Ax");
@@ -194,12 +192,12 @@ void apply_gauge(Grid &par, double2 *wfc, double2 *Ax, double2 *Ay,
             cMult<<<grid,threads>>>(wfc, (cufftDoubleComplex*) Ax, wfc);
         }
 
-        result = cufftExecZ2Z(plan_dim2, wfc, wfc, CUFFT_INVERSE);
+        cufftExecZ2Z(plan_dim2, wfc, wfc, CUFFT_INVERSE);
         scalarMult<<<grid,threads>>>(wfc, renorm_factor_x, wfc);
 
 
         // 1d forward / mult by Ay
-        result = cufftExecZ2Z(plan_1d, wfc, wfc, CUFFT_FORWARD);
+        cufftExecZ2Z(plan_1d, wfc, wfc, CUFFT_FORWARD);
         scalarMult<<<grid,threads>>>(wfc, renorm_factor_y ,wfc);
         if(par.bval("Ay_time")){
             EqnNode_gpu* Ay_eqn = par.astval("Ay");
@@ -210,7 +208,7 @@ void apply_gauge(Grid &par, double2 *wfc, double2 *Ax, double2 *Ay,
         else{
             cMult<<<grid,threads>>>(wfc, (cufftDoubleComplex*) Ay, wfc);
         }
-        result = cufftExecZ2Z(plan_1d, wfc, wfc, CUFFT_INVERSE);
+        cufftExecZ2Z(plan_1d, wfc, wfc, CUFFT_INVERSE);
         scalarMult<<<grid,threads>>>(wfc, renorm_factor_y, wfc);
 
     }
@@ -283,7 +281,6 @@ void evolve(Grid &par,
     int gridSize = xDim * yDim * zDim;
 
     // getting data from Cuda class
-    cufftResult result;
     cufftHandle plan_1d = par.ival("plan_1d");
     cufftHandle plan_2d = par.ival("plan_2d");
     cufftHandle plan_other2d = par.ival("plan_other2d");
@@ -646,7 +643,7 @@ void evolve(Grid &par,
                             FileIO::writeOutVortex(buffer, data_dir + "vort_arr",
                                                    vortCoords->getVortices(), i);
                         }
-                        printf("Located %d vortices\n", 
+                        printf("Located %lu vortices\n", 
                                vortCoords->getVortices().size());
     
                         //Free memory block for now.
@@ -708,7 +705,7 @@ void evolve(Grid &par,
         }
 
         // U_p(dt)*fft2(wfc)
-        result = cufftExecZ2Z(plan_3d,gpuWfc,gpuWfc,CUFFT_FORWARD);
+        cufftExecZ2Z(plan_3d,gpuWfc,gpuWfc,CUFFT_FORWARD);
 
         // Normalise
         scalarMult<<<grid,threads>>>(gpuWfc,renorm_factor_nd,gpuWfc);
@@ -721,7 +718,7 @@ void evolve(Grid &par,
         else{
             cMult<<<grid,threads>>>(K_gpu,gpuWfc,gpuWfc);
         }
-        result = cufftExecZ2Z(plan_3d,gpuWfc,gpuWfc,CUFFT_INVERSE);
+        cufftExecZ2Z(plan_3d,gpuWfc,gpuWfc,CUFFT_INVERSE);
 
         // Normalise
         scalarMult<<<grid,threads>>>(gpuWfc,renorm_factor_nd,gpuWfc);
@@ -785,7 +782,7 @@ void evolve(Grid &par,
                             plan_other2d, dx, dy, dz, time);
             }
             else if (dimnum == 1){
-                result = cufftExecZ2Z(plan_1d,gpuWfc,gpuWfc,CUFFT_FORWARD);
+                cufftExecZ2Z(plan_1d,gpuWfc,gpuWfc,CUFFT_FORWARD);
                 scalarMult<<<grid,threads>>>(gpuWfc,renorm_factor_x,gpuWfc);
                 if(par.bval("Ax_time")){
                     EqnNode_gpu* Ax_eqn = par.astval("Ax");
@@ -798,7 +795,7 @@ void evolve(Grid &par,
                         (cufftDoubleComplex*) gpu1dpAx, gpuWfc);
                 }
 
-                result = cufftExecZ2Z(plan_1d,gpuWfc,gpuWfc, CUFFT_INVERSE);
+                cufftExecZ2Z(plan_1d,gpuWfc,gpuWfc, CUFFT_INVERSE);
                 scalarMult<<<grid,threads>>>(gpuWfc, renorm_factor_x, gpuWfc);
             }
         }

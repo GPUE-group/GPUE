@@ -61,9 +61,8 @@ void gpuReduce(double* data, int length, int threadCount) {
         length /= threadCount;
         block = (int) ceil((double)length/threadCount);
     }
-    threads = length;
-    multipass<<<1,threads,threadCount*sizeof(double)>>>(&data[0],
-                                                        &data[0]);
+    multipass<<<1,length,threadCount*sizeof(double)>>>(&data[0],
+                                                       &data[0]);
 }
 
 /*
@@ -229,7 +228,7 @@ double energy_calc(Grid &par, double2* wfc){
     double renorm_factor = 1.0/pow(gsize,0.5);
 
     double2 *wfc_c, *wfc_k;
-    double2 *energy_r, *energy_k, *energy_l;
+    double2 *energy_r, *energy_k;
     double *energy;
 
     cudaMalloc((void **) &wfc_c, sizeof(double2)*gsize);
@@ -288,8 +287,6 @@ double energy_calc(Grid &par, double2* wfc){
 
         double2 *energy_l, *dwfc;
         double *A;
-        double *check;
-        check = (double *)malloc(sizeof(double)*10);
 
         cudaMalloc((void **) &energy_l, sizeof(double2)*gsize);
         cudaMalloc((void **) &dwfc, sizeof(double2)*gsize);
@@ -328,15 +325,13 @@ double energy_calc(Grid &par, double2* wfc){
 
     gpuReduce(energy, gsize, threads.x);
 
-    double *energy_cpu;
-    energy_cpu = (double *)malloc(sizeof(double)*gsize);
+    double sum = 0;
 
-    cudaMemcpy(energy_cpu, energy, sizeof(double)*gsize,
+    cudaMemcpy(&sum, energy, sizeof(double),
                cudaMemcpyDeviceToHost);
 
-    double sum = energy_cpu[0] * dg;
+    sum *= dg;
 
-    free(energy_cpu);
     cudaFree(energy);
     cudaFree(wfc_c);
 

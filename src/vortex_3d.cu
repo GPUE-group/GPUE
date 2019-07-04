@@ -364,7 +364,7 @@ void find_sobel(Grid &par){
 void find_sobel_2d(Grid &par){
 
     std::string conv_type = par.sval("conv_type");
-    int xDim, yDim, zDim;
+    int xDim, yDim;
 
     // There will be two cases to take into account here, one for fft 
     // convolution and another for window
@@ -372,7 +372,7 @@ void find_sobel_2d(Grid &par){
     int index = 0;
 
     if (conv_type == "FFT"){
-        double2 *sobel_x, *sobel_y, *sobel_z;
+        double2 *sobel_x, *sobel_y;
         xDim = par.ival("xDim");
         yDim = par.ival("yDim");
 
@@ -465,11 +465,9 @@ void find_sobel_2d(Grid &par){
 
         par.store("sobel_x", sobel_x);
         par.store("sobel_y", sobel_y);
-        par.store("sobel_z", sobel_z);
-
     }
     else{
-        double *sobel_x, *sobel_y, *sobel_z;
+        double *sobel_x, *sobel_y;
         xDim = 3;
         yDim = 3;
 
@@ -554,7 +552,6 @@ void find_sobel_2d(Grid &par){
 
         par.store("sobel_x", sobel_x);
         par.store("sobel_y", sobel_y);
-        par.store("sobel_z", sobel_z);
     }
 
     transfer_sobel(par);

@@ -72,13 +72,11 @@ int init(Grid &par){
     double *Energy;
     double *r;
     double *V_opt;
-    double *Energy_gpu;
     cufftDoubleComplex *wfc;
     if (par.bval("read_wfc") == true){
         wfc = par.cufftDoubleComplexval("wfc");
     }
     cufftDoubleComplex *EV_opt;
-    cufftDoubleComplex *wfc_backup;
     cufftDoubleComplex *EappliedField;
 
     std::cout << "gSize is: " << gSize << '\n';
@@ -231,7 +229,6 @@ int init(Grid &par){
 
     wfc = par.cufftDoubleComplexval("wfc");
 
-    int index = 0;
     for(int i=0; i < gSize; i++ ){
         sum+=sqrt(wfc[i].x*wfc[i].x + wfc[i].y*wfc[i].y);
     }
@@ -347,11 +344,9 @@ int init(Grid &par){
     // Initializes uninitialized variables to 0 values
     par.store("Energy", Energy);
     par.store("r", r);
-    par.store("Energy_gpu", Energy_gpu);
     par.store("wfc", wfc);
     par.store("EV_opt", EV_opt);
     par.store("V_opt", V_opt);
-    par.store("wfc_backup", wfc_backup);
     par.store("EappliedField", EappliedField);
 
     par.store("result", result);

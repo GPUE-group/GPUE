@@ -47,51 +47,23 @@ int isError(int result, char* c){
     }
     return result;
 }
+
 /*
- * Used to perform parallel summation on WFC for normalisation.
- */
-void parSum(double* gpuWfc, double* gpuParSum, Grid &par){
-    // May need to add double l
-    int dimnum = par.ival("dimnum");
-    double dx = par.dval("dx");
-    double dy = par.dval("dy");
-    double dz = par.dval("dz");
-    dim3 threads = par.threads;
-    int xDim = par.ival("xDim");
-    int yDim = par.ival("yDim");
-    int zDim = par.ival("zDim");
-    dim3 grid_tmp(xDim, 1, 1);
-    int gsize = xDim;
-    double dg = dx;
+ * General-purpose summation of an array on the gpu, storing the result in the first element
+*/
+void gpuReduce(double* data, int length, int threadCount) {
+    dim3 block(length / threadCount, 1, 1);
+    dim3 threads(threadCount, 1, 1);
 
-    // Setting option for 3d
-    if (dimnum > 1){
-        grid_tmp.x *= yDim;
-        gsize *= yDim;
-        dg *= dy;
+    while((double)length/threadCount > 1.0){
+        multipass<<<block,threads,threadCount*sizeof(double)>>>(&data[0],
+                                                                &data[0]);
+        length /= threadCount;
+        block = (int) ceil((double)length/threadCount);
     }
-    if (dimnum > 2){
-        grid_tmp.x *= zDim;
-        gsize *= zDim;
-        dg *= dz;
-    }
-    dim3 block(grid_tmp.x/threads.x, 1, 1);
-    dim3 thread_tmp = threads;
-    int pass = 0;
-
-    set_eq<<<par.grid, par.threads>>>(gpuWfc, gpuParSum);
-
-    while((double)grid_tmp.x/threads.x > 1.0){
-        multipass<<<block,thread_tmp,thread_tmp.x*sizeof(double)>>>(
-            &gpuParSum[0],&gpuParSum[0]);
-        grid_tmp.x /= threads.x;
-        block = (int) ceil((double)grid_tmp.x/threads.x);
-        pass++;
-        //std::cout << grid_tmp.x << '\n';
-    }
-    thread_tmp = grid_tmp.x;
-    multipass<<<1,thread_tmp,thread_tmp.x*sizeof(double2)>>>(&gpuParSum[0],
-                                                           &gpuParSum[0]);
+    threads = length;
+    multipass<<<1,threads,threadCount*sizeof(double)>>>(&data[0],
+                                                        &data[0]);
 }
 
 /*
@@ -123,32 +95,13 @@ void parSum(double2* gpuWfc, Grid &par){
         dg *= dz;
     }
     dim3 block(grid_tmp.x/threads.x, 1, 1);
-    dim3 thread_tmp = threads;
-    int pass = 0;
 
     double *density;
     cudaMalloc((void**) &density, sizeof(double)*gsize);
 
     complexMagnitudeSquared<<<par.grid, par.threads>>>(gpuWfc, density);
 
-/*
-    std::cout << "grid / threads = " << '\t'
-              << (double)grid_tmp.x/threads.x << '\n'
-              << "grid.x is: " << grid_tmp.x << '\t'
-              << "threads.x are: " << threads.x << '\n';
-*/
-    while((double)grid_tmp.x/threads.x > 1.0){
-        multipass<<<block,threads,threads.x*sizeof(double)>>>(&density[0],
-                                                              &density[0]);
-        grid_tmp.x /= threads.x;
-        block = (int) ceil((double)grid_tmp.x/threads.x);
-        pass++;
-        //std::cout << pass << '\t' << grid_tmp.x << '\n';
-    }
-    thread_tmp = grid_tmp.x;
-    multipass<<<1,thread_tmp,thread_tmp.x*sizeof(double)>>>(&density[0],
-                                                            &density[0]);
-
+    gpuReduce(density, grid_tmp.x, threads.x);
 /*
     // Writing out in the parSum Function (not recommended, for debugging)
     double *sum;
@@ -373,16 +326,15 @@ double energy_calc(Grid &par, double2* wfc){
         cudaFree(energy_l);
     }
 
+    gpuReduce(energy, gsize, threads.x);
+
     double *energy_cpu;
     energy_cpu = (double *)malloc(sizeof(double)*gsize);
 
     cudaMemcpy(energy_cpu, energy, sizeof(double)*gsize,
                cudaMemcpyDeviceToHost);
 
-    double sum = 0;
-    for (int i = 0; i < gsize; ++i){
-        sum += energy_cpu[i]*dg;
-    }
+    double sum = energy_cpu[0] * dg;
 
     free(energy_cpu);
     cudaFree(energy);

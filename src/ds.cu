@@ -1,6 +1,7 @@
 
 #include "../include/ds.h"
 #include "../include/operators.h"
+#include "../include/split_op.h"
 
 /*----------------------------------------------------------------------------//
 * AUX
@@ -22,19 +23,9 @@ void generate_plan_other2d(cufftHandle *plan_fft1d, Grid &par){
     int istride = yDim;
     int ostride = yDim;
 
-    cufftResult result;
-
-    result = cufftPlanMany(plan_fft1d, rank, n, inembed, istride, 
-                           idist, onembed, ostride, odist, 
-                           CUFFT_Z2Z, batch);
-
-    if(result != CUFFT_SUCCESS){
-        printf("Result:=%d\n",result);
-        printf("Error: Could not execute cufftPlanfft1d(%s ,%d ,%d ).\n", 
-               "plan_1d", (unsigned int)xDim, (unsigned int)yDim);
-        exit(1);
-    }
-
+    cufftHandleError( cufftPlanMany(plan_fft1d, rank, n, inembed, istride, 
+                                    idist, onembed, ostride, odist, 
+                                    CUFFT_Z2Z, batch) );
 }
 
 // other plan for 3d case
@@ -44,11 +35,9 @@ void generate_plan_other3d(cufftHandle *plan_fft1d, Grid &par, int axis){
     int yDim = par.ival("yDim");
     int zDim = par.ival("zDim");
 
-    cufftResult result;
-
     // Along first dimension (x)
     if (axis == 0){
-        result = cufftPlan1d(plan_fft1d, xDim, CUFFT_Z2Z, yDim*zDim);
+        cufftHandleError( cufftPlan1d(plan_fft1d, xDim, CUFFT_Z2Z, yDim*zDim) );
     }
 
     // Along second dimension (y)
@@ -64,10 +53,9 @@ void generate_plan_other3d(cufftHandle *plan_fft1d, Grid &par, int axis){
         int istride = yDim;
         int ostride = yDim;
     
-        result = cufftPlanMany(plan_fft1d, rank, n, inembed, istride, 
-                               idist, onembed, ostride, odist, 
-                               CUFFT_Z2Z, batch);
-        //result = cufftPlan2d(plan_fft1d, xDim, yDim, CUFFT_Z2Z);
+        cufftHandleError( cufftPlanMany(plan_fft1d, rank, n, inembed, istride, 
+                                        idist, onembed, ostride, odist, 
+                                        CUFFT_Z2Z, batch) );
         
     }
 
@@ -84,19 +72,10 @@ void generate_plan_other3d(cufftHandle *plan_fft1d, Grid &par, int axis){
         int istride = xDim*yDim;
         int ostride = xDim*yDim;
     
-        result = cufftPlanMany(plan_fft1d, rank, n, inembed, istride, 
-                               idist, onembed, ostride, odist, 
-                               CUFFT_Z2Z, batch);
+        cufftHandleError( cufftPlanMany(plan_fft1d, rank, n, inembed, istride, 
+                                        idist, onembed, ostride, odist, 
+                                        CUFFT_Z2Z, batch) );
     }
-
-    if(result != CUFFT_SUCCESS){
-        printf("Result:=%d\n",result);
-        printf("Error: Could not execute cufftPlan3d(%s, %d, %d, %d).\n", 
-               "plan_3d", (unsigned int)xDim, (unsigned int)yDim,
-                (unsigned int)zDim);
-        exit(1);
-    }
-
 }
 
 // Function to set functionPtrs without an unordered map

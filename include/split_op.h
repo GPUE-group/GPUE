@@ -38,33 +38,42 @@
 	//printf("OpenMP support disabled due to Clang/LLVM being behind the trend.",);
 #endif
 
- /**
- * @brief	Checks if CUDA operation has succeeded. Prints to stdout.
+/**
+ * @brief	Checks if a CUDA operation has succeeded. Prints to stdout.
  * @ingroup	data
- * @param	result Function result code of CUDA operation
- * @param	c Descriptor of CUDA operation
- * @return	0 for success. See CUDA failure codes in cuda.h for other values.
+ * @param	result Result code of CUDA operation
  */
-int isError(int result, char* c); //Checks to see if an error has occurred.
+void cudaHandleError(cudaError_t result);
+
+/**
+ * @brief Checks if the last CUDA operation has succeeded. Prints to stdout.
+ * @ingroup data
+ */
+void cudaCheckError();
+
+/**
+ * @brief Checks if a cuFFT operation has succeeded. Prints to stdout.
+ * @ingroup data
+ * @param result Result code of cuFFT operation
+ */
+void cufftHandleError(cufftResult result);
+
+/**
+ * @brief Performs parallel summation on a flat array of data
+ * @ingroup gpu
+ * @param data Gpu-allocated array to reduce
+ * @param length Length of data
+ * @param threadCount number of threads to use
+ */
+void gpuReduce(double* data, int length, int threadCount);
 
 /**
 * @brief	Performs parallel summation and renormalises the wavefunction
 * @ingroup	data
 * @param	gpuWfc GPU memory location for wavefunction
-* @param	Parameter class
-* @return	0 for success. See CUDA failure codes in cuda.h for other values.
+* @param	par Parameter class
 */
 void parSum(double2* gpuWfc, Grid &par);
-
-/**
-* @brief        Performs parallel summation and renormalises the wavefunction
-* @ingroup      data
-* @param        gpuWfc GPU memory location for wavefunction
-* @param        gpuParSum wavefunction density
-* @param        Parameter class
-* @return       0 for success. See CUDA failure codes in cuda.h for other values.
-*/
-void parSum(double* gpuWfc, double *gpuParSum, Grid &par);
 
 /**
 * @brief	Creates the optical lattice to match the vortex lattice constant

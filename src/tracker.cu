@@ -33,8 +33,6 @@ namespace Tracker {
     [[deprecated]]
     int findOLMaxima(int *marker, double *Vopt, double radius, int xDim, double* x){
         double gridValues[9];
-        // int2 mIndex[1024];
-        // int2 index;
         int i,j,found;
         found=0;
         for (i=1; i<xDim-1; ++i ){
@@ -52,9 +50,6 @@ namespace Tracker {
                     if(fabs((gridValues[4]-Minions::maxValue(gridValues,9))/gridValues[4]) <= 1e-7){
                         //printf ("%d,%d\n",i,j);
                         (marker)[i*xDim + j] = 1;
-                        // index.x=i;
-                        // index.y=j;
-                        // mIndex[found] = index;
                         ++found;
                     }
                 }

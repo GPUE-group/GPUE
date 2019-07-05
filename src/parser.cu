@@ -180,11 +180,7 @@ Grid parseArgs(int argc, char** argv){
             }
             case 'I':
             {
-                std::string data_dir = par.sval("data_dir");
-                std::string param_file = filecheck(data_dir 
-                                                   + (std::string)optarg);
-                std::cout << "Input parameter file is " <<  param_file << '\n';
-                par.store("param_file", (std::string)param_file);
+                par.store("param_file", (std::string)optarg);
                 par.store("use_param_file", true);
                 break;
             }
@@ -199,11 +195,6 @@ Grid parseArgs(int argc, char** argv){
             case 'r':
             {
                 printf("Reading wavefunction from file.\n");
-                std::string data_dir = par.sval("data_dir");
-                std::string infile = filecheck(data_dir + "wfc_load");
-                std::string infilei = filecheck(data_dir + "wfci_load");
-                par.store("infile", infile);
-                par.store("infilei", infilei);
                 par.store("read_wfc",true);
                 break;
             }
@@ -406,15 +397,6 @@ Grid parseArgs(int argc, char** argv){
                         par.Azfile = filecheck("src/Azgauge");
                     }
                     par.store("box_size", 2.5e-5);
-                    if (par.ival("yDim") == 1){
-                        par.store("yDim",256);
-                    }
-                    if (par.ival("zDim") == 1){
-                        par.store("zDim",256);
-                    }
-                }
-                if (dimnum == 2 && par.ival("yDim") == 1){
-                    par.store("yDim",256);
                 }
                 par.store("dimnum",(int)dimnum);
                 break;
@@ -422,27 +404,11 @@ Grid parseArgs(int argc, char** argv){
 
             // this case is special and may require reading input from a file
             // or from cin
-            case 'A':
+            case 'A': // TODO: remove dependency on data_dir
             {
                 std::string field = optarg;
                 std::cout << "Chosen gauge field is: " << field << '\n';
-
-                // If the file gauge field is chosen, we need to make sure the
-                // the files exist
-                if (strcmp(optarg, "file") == 0){
-                    std::string data_dir = par.sval("data_dir");
-                    std::cout << "Finding file for Ax..." << '\n';
-                    par.Axfile = filecheck(data_dir + "/Axgauge");
-                    std::cout << "Finding file for Ay..." << '\n';
-                    par.Ayfile = filecheck(data_dir + "/Aygauge");
-                    if (par.ival("dimnum") == 3){
-                        std::cout << "Finding file for Az..." << '\n';
-                        par.Azfile = filecheck(data_dir + "/Azgauge");
-                    }
-                }
-
                 par.Afn = field;
-                //exit(0);
                 break;
             }
             case 'a':
@@ -480,15 +446,58 @@ Grid parseArgs(int argc, char** argv){
         }
     }
 
+    std::string data_dir = par.sval("data_dir");
+    int dimnum = par.ival("dimnum");
+
     // Setting variables
-    if (stat(par.sval("data_dir").c_str(), &st) == -1) {
-        mkdir(par.sval("data_dir").c_str(), 0700);
+    if (stat(data_dir.c_str(), &st) == -1) {
+        mkdir(data_dir.c_str(), 0700);
     }
 
-    if (par.ival("dimnum") == 2){
+    if (dimnum == 2){
         par.store("zDim", 1);
     }
 
+    // Update values which depend on other values, so that they don't need to be entered in order
+
+    if (par.bval("use_param_file")) {
+        std::string param_file = filecheck(data_dir 
+            + par.sval("param_file"));
+        std::cout << "Input parameter file is " <<  param_file << '\n';
+        par.store("param_file", (std::string)param_file);
+    }
+
+    if (par.bval("read_wfc")) {
+        std::string infile = filecheck(data_dir + "wfc_load");
+        std::string infilei = filecheck(data_dir + "wfci_load");
+        par.store("infile", infile);
+        par.store("infilei", infilei);
+    }
+
+    if (dimnum == 3) {
+        if (par.ival("yDim") == 1){
+            par.store("yDim",256);
+        }
+        if (par.ival("zDim") == 1){
+            par.store("zDim",256);
+        }
+    }
+
+    if (dimnum == 2 && par.ival("yDim") == 1){
+        par.store("yDim",256); // why?
+    }
+
+    // If the file gauge field is chosen, we need to make sure the files exist
+    if (par.Afn.compare("file") == 0){
+        std::cout << "Finding file for Ax..." << '\n';
+        par.Axfile = filecheck(data_dir + "Axgauge");
+        std::cout << "Finding file for Ay..." << '\n';
+        par.Ayfile = filecheck(data_dir + "Aygauge");
+        if (dimnum == 3){
+            std::cout << "Finding file for Az..." << '\n';
+            par.Azfile = filecheck(data_dir + "Azgauge");
+        }
+    }
 
     return par;
 }

@@ -586,46 +586,33 @@ void transfer_sobel(Grid &par){
         double2 *sobel_x = par.cufftDoubleComplexval("sobel_x");
         double2 *sobel_y = par.cufftDoubleComplexval("sobel_y");
         double2 *sobel_z = par.cufftDoubleComplexval("sobel_z");
-        cudaMalloc((void**) &sobel_x_gpu, sizeof(double2) *gSize);
-        cudaMalloc((void**) &sobel_y_gpu, sizeof(double2) *gSize);
+        cudaHandleError( cudaMalloc((void**) &sobel_x_gpu, sizeof(double2) *gSize) );
+        cudaHandleError( cudaMalloc((void**) &sobel_y_gpu, sizeof(double2) *gSize) );
         if (dimnum == 3){
-            cudaMalloc((void**) &sobel_z_gpu, sizeof(double2) *gSize);
+            cudaHandleError( cudaMalloc((void**) &sobel_z_gpu, sizeof(double2) *gSize) );
         }
 
         // Transferring to device
-        cudaError_t err;
     
         // Sobel_x
-        err = cudaMemcpy(sobel_x_gpu, sobel_x, sizeof(double2)*gSize,
-                         cudaMemcpyHostToDevice);
-        if (err != cudaSuccess){
-            std::cout << "ERROR: Could not copy sobel_x to device!" << '\n';
-            exit(1);
-        }
+        cudaHandleError( cudaMemcpy(sobel_x_gpu, sobel_x, sizeof(double2)*gSize,
+                                    cudaMemcpyHostToDevice));
     
         // Sobel_y
-        err = cudaMemcpy(sobel_y_gpu, sobel_y, sizeof(double2)*gSize,
-                         cudaMemcpyHostToDevice);
-        if (err != cudaSuccess){
-            std::cout << "ERROR: Could not copy sobel_y to device!" << '\n';
-            exit(1);
-        }
+        cudaHandleError( cudaMemcpy(sobel_y_gpu, sobel_y, sizeof(double2)*gSize,
+                                    cudaMemcpyHostToDevice) );
     
         if (dimnum == 3){
         // Sobel_z
-            err = cudaMemcpy(sobel_z_gpu, sobel_z, sizeof(double2)*gSize,
-                             cudaMemcpyHostToDevice);
-            if (err != cudaSuccess){
-                std::cout << "ERROR: Could not copy sobel_z to device!" << '\n';
-                exit(1);
-            }
+        cudaHandleError( cudaMemcpy(sobel_z_gpu, sobel_z, sizeof(double2)*gSize,
+                                    cudaMemcpyHostToDevice) );
         }
     
         // We only need the FFT's of the sobel operators. Let's generate those
-        cufftExecZ2Z(plan_nd, sobel_x_gpu, sobel_x_gpu, CUFFT_FORWARD);
-        cufftExecZ2Z(plan_nd, sobel_y_gpu, sobel_y_gpu, CUFFT_FORWARD);
+        cufftHandleError( cufftExecZ2Z(plan_nd, sobel_x_gpu, sobel_x_gpu, CUFFT_FORWARD) );
+        cufftHandleError( cufftExecZ2Z(plan_nd, sobel_y_gpu, sobel_y_gpu, CUFFT_FORWARD) );
         if (dimnum == 3){
-            cufftExecZ2Z(plan_nd, sobel_z_gpu, sobel_z_gpu, CUFFT_FORWARD);
+            cufftHandleError( cufftExecZ2Z(plan_nd, sobel_z_gpu, sobel_z_gpu, CUFFT_FORWARD) );
         }
     
         // Storing in set of parameters
@@ -644,38 +631,25 @@ void transfer_sobel(Grid &par){
         else if (dimnum == 3){
             size = 27;
         }
-        cudaMalloc((void**) &sobel_x_gpu, sizeof(double) *size);
-        cudaMalloc((void**) &sobel_y_gpu, sizeof(double) *size);
-        cudaMalloc((void**) &sobel_z_gpu, sizeof(double) *size);
+        cudaHandleError( cudaMalloc((void**) &sobel_x_gpu, sizeof(double) *size) );
+        cudaHandleError( cudaMalloc((void**) &sobel_y_gpu, sizeof(double) *size) );
+        cudaHandleError( cudaMalloc((void**) &sobel_z_gpu, sizeof(double) *size) );
         // Transferring to device
-        cudaError_t err;
-   
+
         // Sobel_x
-        err = cudaMemcpy(sobel_x_gpu, sobel_x, sizeof(double)*gSize,
-                         cudaMemcpyHostToDevice);
-        if (err != cudaSuccess){
-            std::cout << "ERROR: Could not copy sobel_x to device!" << '\n';
-            exit(1);
-        }
-   
+        cudaHandleError( cudaMemcpy(sobel_x_gpu, sobel_x, sizeof(double)*gSize,
+                                    cudaMemcpyHostToDevice) );
+
         // Sobel_y
-        err = cudaMemcpy(sobel_y_gpu, sobel_y, sizeof(double)*gSize,
-                         cudaMemcpyHostToDevice);
-        if (err != cudaSuccess){
-            std::cout << "ERROR: Could not copy sobel_y to device!" << '\n';
-            exit(1);
-        }
-   
+        cudaHandleError( cudaMemcpy(sobel_y_gpu, sobel_y, sizeof(double)*gSize,
+                                    cudaMemcpyHostToDevice));
+
         if (dimnum == 3){
             // Sobel_z
-            err = cudaMemcpy(sobel_z_gpu, sobel_z, sizeof(double)*gSize,
-                             cudaMemcpyHostToDevice);
-            if (err != cudaSuccess){
-                std::cout << "ERROR: Could not copy sobel_z to device!" << '\n';
-                exit(1);
-            }
+            cudaHandleError( cudaMemcpy(sobel_z_gpu, sobel_z, sizeof(double)*gSize,
+                                        cudaMemcpyHostToDevice) );
         }
-   
+
         // Storing in set of parameters
         par.store("sobel_x_gpu", sobel_x_gpu);
         par.store("sobel_y_gpu", sobel_y_gpu);
@@ -716,14 +690,14 @@ void find_edges(Grid &par,
         if (dimnum == 3){
             find_sobel(par);
         }
-        cudaMalloc((void**) &density_d, sizeof(double) * gSize);
-        cudaMalloc((void**) &gradient_x_fft, sizeof(double2) * gSize);
-        cudaMalloc((void**) &gradient_y_fft, sizeof(double2) * gSize);
+        cudaHandleError( cudaMalloc((void**) &density_d, sizeof(double) * gSize) );
+        cudaHandleError( cudaMalloc((void**) &gradient_x_fft, sizeof(double2) * gSize) );
+        cudaHandleError( cudaMalloc((void**) &gradient_y_fft, sizeof(double2) * gSize) );
         if (dimnum == 3){
-            cudaMalloc((void**) &gradient_z_fft, sizeof(double2) * gSize);
+            cudaHandleError( cudaMalloc((void**) &gradient_z_fft, sizeof(double2) * gSize) );
         }
-        cudaMalloc((void**) &density_d2, sizeof(double2) * gSize);
-        cudaMalloc((void**) &edges_gpu, sizeof(double) * gSize);
+        cudaHandleError( cudaMalloc((void**) &density_d2, sizeof(double2) * gSize) );
+        cudaHandleError( cudaMalloc((void**) &edges_gpu, sizeof(double) * gSize) );
     }
     else{
         density_d = par.dsval("density_d");
@@ -740,6 +714,7 @@ void find_edges(Grid &par,
 
     // now to perform the complexMagnitudeSquared operation
     complexMagnitudeSquared<<<grid,threads>>>(wfc_gpu, density_d);
+    cudaCheckError();
 
     // Pulling operators from find_sobel(par)
     double2 *sobel_x_gpu = par.cufftDoubleComplexval("sobel_x_gpu");
@@ -755,39 +730,45 @@ void find_edges(Grid &par,
     //cufftPlan3d(&plan_3d2z, xDim, yDim, zDim, CUFFT_D2Z);
 
     make_cufftDoubleComplex<<<grid, threads>>>(density_d, density_d2);
+    cudaCheckError();
 
     // Now fft forward, multiply, fft back
-    cufftExecZ2Z(plan_3d, density_d2, gradient_x_fft, CUFFT_FORWARD);
-    cufftExecZ2Z(plan_3d, density_d2, gradient_y_fft, CUFFT_FORWARD);
+    cufftHandleError( cufftExecZ2Z(plan_3d, density_d2, gradient_x_fft, CUFFT_FORWARD) );
+    cufftHandleError( cufftExecZ2Z(plan_3d, density_d2, gradient_y_fft, CUFFT_FORWARD) );
     if (dimnum == 3){
-        cufftExecZ2Z(plan_3d, density_d2, gradient_z_fft, CUFFT_FORWARD);
+        cufftHandleError( cufftExecZ2Z(plan_3d, density_d2, gradient_z_fft, CUFFT_FORWARD) );
     }
 
     // Now to perform the multiplication
     cMult<<<grid, threads>>>(gradient_x_fft, sobel_x_gpu, gradient_x_fft);
+    cudaCheckError();
     cMult<<<grid, threads>>>(gradient_y_fft, sobel_y_gpu, gradient_y_fft);
+    cudaCheckError();
     if (dimnum == 3){
         cMult<<<grid, threads>>>(gradient_z_fft, sobel_z_gpu, gradient_z_fft);
+        cudaCheckError();
     }
     
     // FFT back
-    cufftExecZ2Z(plan_3d, gradient_x_fft, gradient_x_fft, CUFFT_INVERSE);
-    cufftExecZ2Z(plan_3d, gradient_y_fft, gradient_y_fft, CUFFT_INVERSE);
+    cufftHandleError( cufftExecZ2Z(plan_3d, gradient_x_fft, gradient_x_fft, CUFFT_INVERSE) );
+    cufftHandleError( cufftExecZ2Z(plan_3d, gradient_y_fft, gradient_y_fft, CUFFT_INVERSE) );
     if (dimnum == 3){
-        cufftExecZ2Z(plan_3d, gradient_z_fft, gradient_z_fft, CUFFT_INVERSE);
+        cufftHandleError( cufftExecZ2Z(plan_3d, gradient_z_fft, gradient_z_fft, CUFFT_INVERSE) );
     }
 
     if (dimnum == 2){
         l2_norm<<<grid, threads>>>(gradient_x_fft, gradient_y_fft, edges_gpu);
+        cudaCheckError();
     }
     else if (dimnum == 3){
         l2_norm<<<grid, threads>>>(gradient_x_fft, gradient_y_fft, 
                                    gradient_z_fft, edges_gpu);
+        cudaCheckError();
     }
 
     // Copying edges back
-    cudaMemcpy(edges, edges_gpu, sizeof(double) * gSize, 
-               cudaMemcpyDeviceToHost);
+    cudaHandleError( cudaMemcpy(edges, edges_gpu, sizeof(double) * gSize, 
+                                cudaMemcpyDeviceToHost) );
 
     // Method to find edges based on window approach -- more efficient, 
     // but difficult to implement

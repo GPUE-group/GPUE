@@ -12,8 +12,8 @@ Grid parseArgs(int argc, char** argv){
 
     // Setting default values
     par.store("xDim", 256);
-    par.store("yDim", 1);
-    par.store("zDim", 1);
+    par.store("yDim", 256);
+    par.store("zDim", 256);
     par.store("omega", 0.0);
     par.store("gammaY", 1.0);
     par.store("gsteps", 1);
@@ -454,8 +454,11 @@ Grid parseArgs(int argc, char** argv){
         mkdir(data_dir.c_str(), 0700);
     }
 
-    if (dimnum == 2){
+    if (dimnum < 3){
         par.store("zDim", 1);
+    }
+    if (dimnum < 2){
+        par.store("yDim", 1);
     }
 
     // Update values which depend on other values, so that they don't need to be entered in order
@@ -472,19 +475,6 @@ Grid parseArgs(int argc, char** argv){
         std::string infilei = filecheck(data_dir + "wfci_load");
         par.store("infile", infile);
         par.store("infilei", infilei);
-    }
-
-    if (dimnum == 3) {
-        if (par.ival("yDim") == 1){
-            par.store("yDim",256);
-        }
-        if (par.ival("zDim") == 1){
-            par.store("zDim",256);
-        }
-    }
-
-    if (dimnum == 2 && par.ival("yDim") == 1){
-        par.store("yDim",256); // why?
     }
 
     // If the file gauge field is chosen, we need to make sure the files exist

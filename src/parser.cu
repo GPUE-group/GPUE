@@ -404,7 +404,7 @@ Grid parseArgs(int argc, char** argv){
 
             // this case is special and may require reading input from a file
             // or from cin
-            case 'A': // TODO: remove dependency on data_dir
+            case 'A':
             {
                 std::string field = optarg;
                 std::cout << "Chosen gauge field is: " << field << '\n';

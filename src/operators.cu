@@ -105,17 +105,17 @@ double *curl2d(Grid &par, double *Ax, double *Ay){
 
     int size = sizeof(double) * xDim * yDim;
     double *curl;
-    curl = (double *)malloc(size);
+    curl = (double *)calloc(size, sizeof(double));
 
     int index;
 
     // Note: To take the curl, we need a change in x and y to create a dx or dy
     //       For this reason, we have added yDim to y and 1 to x
-    for (int i = 0; i < xDim; i++){
-        for (int j = 0; j < yDim-1; j++){
-            index = j + yDim * i;
-            curl[index] = (Ay[index] - Ay[index+xDim]) 
-                          - (Ax[index] - Ax[index+1]);
+    for (int i = 0; i < yDim-1; i++){
+        for (int j = 0; j < xDim-1; j++){
+            index = j + xDim * i;
+            curl[index] = (Ay[index] - Ay[index+1]) 
+                           - (Ax[index] - Ax[index+yDim]);
         }
     }
 
@@ -165,18 +165,18 @@ double *curl3d_x(Grid &par, double *Ax, double *Ay, double *Az){
 
     int size = sizeof(double) * xDim * yDim * zDim;
     double *curl;
-    curl = (double *)malloc(size);
+    curl = (double *)calloc(size, sizeof(double));
 
     int index;
 
     // Note: To take the curl, we need a change in x and y to create a dx or dy
     //       For this reason, we have added yDim to y and 1 to x
-    for (int i = 0; i < xDim; i++){
+    for (int i = 0; i < zDim-1; i++){
         for (int j = 0; j < yDim-1; j++){
-            for (int k = 0; k < zDim - 1; k++){
-                index = k + zDim * j + zDim * yDim * i;
-                curl[index] = (Az[index] - Az[index + xDim])
-                              -(Ay[index] - Ay[index + xDim*yDim]);
+            for (int k = 0; k < xDim-1; k++){
+                index = k + xDim * j + xDim * yDim * i;
+                curl[index] = (Az[index] - Az[index + zDim])
+                              -(Ay[index] - Ay[index + zDim*yDim]);
             }
         }
     }
@@ -194,16 +194,16 @@ double *curl3d_y(Grid &par, double *Ax, double *Ay, double *Az){
 
     int size = sizeof(double) * xDim * yDim * zDim;
     double *curl;
-    curl = (double *)malloc(size);
+    curl = (double *)calloc(size, sizeof(double));
 
     int index;
 
     // Note: To take the curl, we need a change in x and y to create a dx or dy
     //       For this reason, we have added yDim to y and 1 to x
-    for (int i = 0; i < xDim-1; i++){
-        for (int j = 0; j < yDim; j++){
-            for (int k = 0; k < zDim - 1; k++){
-                index = k + zDim * j + zDim * yDim * i;
+    for (int i = 0; i < zDim-1; i++){
+        for (int j = 0; j < yDim-1; j++){
+            for (int k = 0; k < xDim - 1; k++){
+                index = k + xDim * j + xDim * yDim * i;
                 curl[index] = -(Az[index] - Az[index + 1])
                               -(Ax[index] - Ax[index + xDim*yDim]);
             }
@@ -223,16 +223,16 @@ double *curl3d_z(Grid &par, double *Ax, double *Ay, double *Az){
 
     int size = sizeof(double) * xDim * yDim * zDim;
     double *curl;
-    curl = (double *)malloc(size);
+    curl = (double *)calloc(size, sizeof(double));
 
     int index;
 
     // Note: To take the curl, we need a change in x and y to create a dx or dy
     //       For this reason, we have added yDim to y and 1 to x
-    for (int i = 0; i < xDim - 1; i++){
+    for (int i = 0; i < zDim-1; i++){
         for (int j = 0; j < yDim-1; j++){
-            for (int k = 0; k < zDim; k++){
-                index = k + zDim * j + zDim * yDim * i;
+            for (int k = 0; k < xDim-1; k++){
+                index = k + xDim * j + xDim * yDim * i;
                 curl[index] = (Ay[index] - Ay[index + 1])
                               -(Ax[index] - Ax[index + xDim]);
             }

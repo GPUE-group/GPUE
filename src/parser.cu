@@ -393,10 +393,6 @@ Grid parseArgs(int argc, char** argv){
                     par.Kfn = "rotation_K3d";
                     par.Vfn = "3d";
                     par.Wfcfn = "3d";
-                    if (par.Afn == "file"){
-                        std::cout << "Finding file for Az..." << '\n';
-                        par.Azfile = filecheck("src/Azgauge");
-                    }
                     par.store("box_size", 2.5e-5);
                 }
                 par.store("dimnum",(int)dimnum);

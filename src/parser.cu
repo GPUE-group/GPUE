@@ -78,6 +78,7 @@ Grid parseArgs(int argc, char** argv){
                 int xDim = atoi(optarg);
                 printf("Argument for x is given as %d\n",xDim);
                 par.store("xDim",(int)xDim);
+                break;
             }
             case 'b':
             {

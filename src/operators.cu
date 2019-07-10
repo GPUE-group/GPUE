@@ -148,7 +148,7 @@ double *curl3d_phi(Grid &par, double *Bx, double *By){
     curl = (double *)malloc(size);
 
     for (int i = 0; i < xDim*yDim*zDim; ++i){
-        curl[i] = atan2(By[i], Bx[i]);
+        curl[i] = atan2(By[i], Bx[i])+M_PI;
     }
 
     return curl;

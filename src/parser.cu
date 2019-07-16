@@ -8,13 +8,19 @@ std::vector<std::string> split_string(std::string input_string,
                                       char split_char){
     // Finding element number to reserve 
     std::vector<int> char_indices = {0};
+    int prev_index = 0;
     for (size_t i = 0; i < input_string.size(); ++i){
-        if (input_string[i] == split_char){
+        if (input_string[i] == split_char && i-1 != prev_index){
             char_indices.push_back(i+1);
+            prev_index = i;
+        }
+        else if (i == prev_index){
+            prev_index = i;
         }
     }
      
     std::vector<std::string> result(char_indices.size());
+    std::cout << "The result vector size is: " << result.size() << '\n';
     for (size_t i = 0; i < char_indices.size(); ++i){
         result[i] = input_string.substr(char_indices[i],
                                         char_indices[i+1] - char_indices[i]-1);
@@ -34,6 +40,11 @@ void set_interactions(Grid &par, std::string input, int wfc_num,
          // count when skipping blank columns after splitting
          int count = 0;
          std::vector<std::string> cols = split_string(rows[i], ' ');
+         if (cols.size() != wfc_num){
+             std::cout << "Improper interaction terms set!\n";
+             std::cout << "Number of columns should equal number of wfcs";
+             assert(cols.size() == wfc_num);
+         }
          for (size_t j = 0; j < cols.size(); ++j){
              if (cols[j].size() > 0){
                  int index = wfc_num*i + count;

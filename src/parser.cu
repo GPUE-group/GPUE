@@ -16,13 +16,9 @@ std::vector<std::string> split_string(std::string input_string,
     }
      
     std::vector<std::string> result(char_indices.size());
-    std::cout << "The result vector size is: " << result.size() << '\n';
     for (size_t i = 0; i < char_indices.size(); ++i){
         result[i] = input_string.substr(char_indices[i],
                                         char_indices[i+1] - char_indices[i]-1);
-    }
-    for (size_t i = 0; i < result.size(); ++i){
-        std::cout << result[i] << '\n';
     }
     return result;
 }

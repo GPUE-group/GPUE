@@ -31,23 +31,25 @@ void set_interactions(Grid &par, std::string input, int wfc_num,
                       double* interactions, double* gpu_interactions){
 
     // Setting string to be consistent with rest of function
-    input = input.substr(1, input.size()-2);
+    if (input[0] == '{'){
+        input = input.substr(1, input.size()-2);
+    }
 
     // Stripping unnecessary spaces
     // TODO: does not skip all spaces if multiple spaces are next to each other
-    int space_count = -2;
-    for (size_t i = 0; i < input.size(); ++i){
-        if (i == space_count + 1 && input[i] == ' '){
+    int last_space = -1;
+    int i = 0;
+    while (i < input.size()){
+        if (i == last_space + 1 && input[i] == ' '){
             input.erase(input.begin() + i);
-            space_count = i;
-            i++;
+            last_space = i;
+            i--;
         }
         if (input[i] == ';' || input[i] == ' '){
-            space_count = i;
+            last_space = i;
         }
+        i++;
     }
-
-    std::cout << input << '\n';
 
     // splitting along ";"
     std::vector<std::string> rows;

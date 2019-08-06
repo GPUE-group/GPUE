@@ -1260,7 +1260,7 @@ void evolve_test(){
         evolve(par, gsteps);
 
         // Check that the energy is correct
-        double energy = par.dval("energy");
+        double energy = par.dvecval("energy").back();
         double energy_check = 0;
         energy_check = (double)i * 0.5 * HBAR * omegaX;
 
@@ -1275,7 +1275,7 @@ void evolve_test(){
         par.store("e_i", 0);
         set_variables(par);
         evolve(par, esteps);
-        double energy_ev = par.dval("energy");
+        double energy_ev = par.dvecval("energy").back();
 
         if (abs(energy - energy_ev) > thresh*energy_check){
             std::cout << "Energy is not constant in real-time for " 

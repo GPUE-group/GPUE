@@ -970,6 +970,7 @@ void evolve(Grid &par,
             break;
         }
     }
+    par.store("energy", energy);
     par.store("wfc_array", wfc_array);
     par.store("wfc_gpu_array", gpuWfc_array);
 

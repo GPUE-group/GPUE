@@ -182,6 +182,7 @@ item = var(xDim, yDim, zDim,"data_lin","Ay_0")
 to_vtk(item, xDim, yDim, zDim, 1, "test_Ay.vtk")
 '''
 
+'''
 #item = var_r2(xDim, yDim, zDim,"/media/james/ExtraDrive1/GPUE/data_lin")
 #to_vtk(item, xDim, yDim, zDim, 1, "test_Ar.vtk")
 
@@ -204,3 +205,25 @@ to_vtk(item, xDim, yDim, zDim, 1, "test_Az.vtk")
 #angle = find_angle(xDim, yDim, "/media/james/ExtraDrive1/GPUE/data_elong",
 #                   "Pwfc_", 0, thresh)
 #print(angle)
+'''
+'''
+#item = var(xDim, yDim, zDim,"data_ell1_w50","Bx_0")
+#to_vtk(item, xDim, yDim, zDim, "../data_ell1_w50", "Bx_ell_0.vtk")
+
+#item = var(xDim, yDim, zDim,"data_ell1_w50","By_0")
+#to_vtk(item, xDim, yDim, zDim, "../data_ell1_w50", "By_ell_0.vtk")
+
+item = var(xDim, yDim, zDim,"data_ell1_w50","Bphi_0")
+to_vtk(item, xDim, yDim, zDim, "../data_ell1_w50", "Bphi_ell_0.vtk")
+
+#item = var(xDim, yDim, zDim,"data_ell1_w50","Br_0")
+#to_vtk(item, xDim, yDim, zDim, "../data_ell1_w50", "Br_ell_0.vtk")
+
+#item = var(xDim, yDim, zDim,"data_ell1_w50","Bz_0")
+#to_vtk(item, xDim, yDim, zDim, "../data_ell1_w50", "Bz_ell_0.vtk")
+'''
+xDim = 128
+yDim = 128
+zDim = 128
+item = wfc_density(xDim, yDim, zDim, "3d_rot", "wfc_ev", 0)
+to_vtk(item, xDim, yDim, zDim, "../3d_rot", "wfc_test.vtk")

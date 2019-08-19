@@ -14,32 +14,9 @@ void apply_gauge(Grid &par, double2 *wfc, double2 *Ax, double2 *Ay,
 
     if (flip){
 
-        // 1d forward / mult by Ay
+        // 1d forward / mult by Ax
         cufftHandleError( cufftExecZ2Z(plan_1d, wfc, wfc, CUFFT_FORWARD) );
-        scalarMult<<<grid,threads>>>(wfc, renorm_factor_z, wfc);
-        cudaCheckError();
-        if(par.bval("Ay_time")){
-            EqnNode_gpu* Ay_eqn = par.astval("Ay");
-            int e_num = par.ival("Ay_num");
-            ast_cmult<<<grid,threads>>>(wfc, wfc, Ay_eqn, dx, dy, dz,
-                                        time, e_num);
-            cudaCheckError();
-        }
-        else{
-            cMult<<<grid,threads>>>(wfc, (cufftDoubleComplex*) Ay, wfc);
-            cudaCheckError();
-        }
-        cufftHandleError( cufftExecZ2Z(plan_1d, wfc, wfc, CUFFT_INVERSE) );
-        scalarMult<<<grid,threads>>>(wfc, renorm_factor_z, wfc);
-        cudaCheckError();
-
-        // loop to multiply by Ax
-        for (int i = 0; i < yDim; i++){
-            cufftHandleError( cufftExecZ2Z(plan_dim2,  &wfc[i*size],
-                                           &wfc[i*size], CUFFT_FORWARD) );
-        }
-
-        scalarMult<<<grid,threads>>>(wfc, renorm_factor_y, wfc);
+        scalarMult<<<grid,threads>>>(wfc, renorm_factor_x, wfc);
         cudaCheckError();
         if(par.bval("Ax_time")){
             EqnNode_gpu* Ax_eqn = par.astval("Ax");
@@ -50,6 +27,29 @@ void apply_gauge(Grid &par, double2 *wfc, double2 *Ax, double2 *Ay,
         }
         else{
             cMult<<<grid,threads>>>(wfc, (cufftDoubleComplex*) Ax, wfc);
+            cudaCheckError();
+        }
+        cufftHandleError( cufftExecZ2Z(plan_1d, wfc, wfc, CUFFT_INVERSE) );
+        scalarMult<<<grid,threads>>>(wfc, renorm_factor_x, wfc);
+        cudaCheckError();
+
+        // loop to multiply by Ay
+        for (int i = 0; i < yDim; i++){
+            cufftHandleError( cufftExecZ2Z(plan_dim2,  &wfc[i*size],
+                                           &wfc[i*size], CUFFT_FORWARD) );
+        }
+
+        scalarMult<<<grid,threads>>>(wfc, renorm_factor_y, wfc);
+        cudaCheckError();
+        if(par.bval("Ay_time")){
+            EqnNode_gpu* Ay_eqn = par.astval("Ay");
+            int e_num = par.ival("Ay_num");
+            ast_cmult<<<grid,threads>>>(wfc, wfc, Ay_eqn, dx, dy, dz,
+                                        time, e_num);
+            cudaCheckError();
+        }
+        else{
+            cMult<<<grid,threads>>>(wfc, (cufftDoubleComplex*) Ay, wfc);
             cudaCheckError();
         }
 
@@ -63,7 +63,7 @@ void apply_gauge(Grid &par, double2 *wfc, double2 *Ax, double2 *Ay,
 
         // 1D FFT to Az
         cufftHandleError( cufftExecZ2Z(plan_dim3, wfc, wfc, CUFFT_FORWARD) );
-        scalarMult<<<grid,threads>>>(wfc, renorm_factor_x, wfc);
+        scalarMult<<<grid,threads>>>(wfc, renorm_factor_z, wfc);
         cudaCheckError();
 
         if(par.bval("Az_time")){
@@ -79,7 +79,7 @@ void apply_gauge(Grid &par, double2 *wfc, double2 *Ax, double2 *Ay,
         }
 
         cufftHandleError( cufftExecZ2Z(plan_dim3, wfc, wfc, CUFFT_INVERSE) );
-        scalarMult<<<grid,threads>>>(wfc, renorm_factor_x, wfc);
+        scalarMult<<<grid,threads>>>(wfc, renorm_factor_z, wfc);
         cudaCheckError();
 
     }
@@ -106,37 +106,12 @@ void apply_gauge(Grid &par, double2 *wfc, double2 *Ax, double2 *Ay,
         scalarMult<<<grid,threads>>>(wfc, renorm_factor_z, wfc);
         cudaCheckError();
 
-        // loop to multiply by Ax
+        // loop to multiply by Ay
         for (int i = 0; i < yDim; i++){
             cufftHandleError( cufftExecZ2Z(plan_dim2,  &wfc[i*size],
                                            &wfc[i*size], CUFFT_FORWARD) );
         }
 
-        scalarMult<<<grid,threads>>>(wfc, renorm_factor_x, wfc);
-        cudaCheckError();
-
-        if(par.bval("Ax_time")){
-            EqnNode_gpu* Ax_eqn = par.astval("Ax");
-            int e_num = par.ival("Ax_num");
-            ast_cmult<<<grid,threads>>>(wfc, wfc, Ax_eqn, dx, dy, dz,
-                                        time, e_num);
-            cudaCheckError();
-        }
-        else{
-            cMult<<<grid,threads>>>(wfc, (cufftDoubleComplex*) Ax, wfc);
-            cudaCheckError();
-        }
-
-        for (int i = 0; i < yDim; i++){
-            //size = xDim * zDim;
-            cufftHandleError( cufftExecZ2Z(plan_dim2, &wfc[i*size],
-                                           &wfc[i*size], CUFFT_INVERSE) );
-        }
-        scalarMult<<<grid,threads>>>(wfc, renorm_factor_x, wfc);
-        cudaCheckError();
-
-        // 1d forward / mult by Ay
-        cufftHandleError( cufftExecZ2Z(plan_1d, wfc, wfc, CUFFT_FORWARD) );
         scalarMult<<<grid,threads>>>(wfc, renorm_factor_y, wfc);
         cudaCheckError();
 
@@ -151,8 +126,33 @@ void apply_gauge(Grid &par, double2 *wfc, double2 *Ax, double2 *Ay,
             cMult<<<grid,threads>>>(wfc, (cufftDoubleComplex*) Ay, wfc);
             cudaCheckError();
         }
-        cufftHandleError( cufftExecZ2Z(plan_1d, wfc, wfc, CUFFT_INVERSE) );
+
+        for (int i = 0; i < yDim; i++){
+            //size = xDim * zDim;
+            cufftHandleError( cufftExecZ2Z(plan_dim2, &wfc[i*size],
+                                           &wfc[i*size], CUFFT_INVERSE) );
+        }
         scalarMult<<<grid,threads>>>(wfc, renorm_factor_y, wfc);
+        cudaCheckError();
+
+        // 1d forward / mult by Ax
+        cufftHandleError( cufftExecZ2Z(plan_1d, wfc, wfc, CUFFT_FORWARD) );
+        scalarMult<<<grid,threads>>>(wfc, renorm_factor_x, wfc);
+        cudaCheckError();
+
+        if(par.bval("Ax_time")){
+            EqnNode_gpu* Ax_eqn = par.astval("Ax");
+            int e_num = par.ival("Ax_num");
+            ast_cmult<<<grid,threads>>>(wfc, wfc, Ax_eqn, dx, dy, dz,
+                                        time, e_num);
+            cudaCheckError();
+        }
+        else{
+            cMult<<<grid,threads>>>(wfc, (cufftDoubleComplex*) Ax, wfc);
+            cudaCheckError();
+        }
+        cufftHandleError( cufftExecZ2Z(plan_1d, wfc, wfc, CUFFT_INVERSE) );
+        scalarMult<<<grid,threads>>>(wfc, renorm_factor_x, wfc);
         cudaCheckError();
 
     }

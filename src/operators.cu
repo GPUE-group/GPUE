@@ -647,7 +647,7 @@ __global__ void krotation_Ax(double *x, double *y, double *z,
                              double omega, double fudge, double *A){
     int gid = getGid3d3d();
     int yid = blockDim.y*blockIdx.y + threadIdx.y;
-    A[gid] = y[yid] * omega * omegaX;
+    A[gid] = -y[yid] * omega * omegaX;
 }
 
 // Kernel for simple rotational case, Ay
@@ -657,7 +657,7 @@ __global__ void krotation_Ay(double *x, double *y, double *z,
                              double omega, double fudge, double *A){
     int gid = getGid3d3d();
     int xid = blockDim.x*blockIdx.x + threadIdx.x;
-    A[gid] = -x[xid] * omega * omegaY;
+    A[gid] = x[xid] * omega * omegaY;
 }
 
 // Kernel for simple rotational case, Ax
@@ -1129,16 +1129,16 @@ __global__ void aux_fields(double *V, double *K, double gdt, double dt,
     int yid = blockDim.y*blockIdx.y + threadIdx.y;
     int zid = blockDim.z*blockIdx.z + threadIdx.z;
 
-    GV[gid].x = exp( -V[gid]*(gdt/(2*HBAR)));
-    GK[gid].x = exp( -K[gid]*(gdt/HBAR));
+    GV[gid].x = exp(-V[gid]*(gdt/(2*HBAR)));
+    GK[gid].x = exp(-K[gid]*(gdt/HBAR));
     GV[gid].y = 0.0;
     GK[gid].y = 0.0;
 
     // Ax and Ay will be calculated here but are used only for
     // debugging. They may be needed later for magnetic field calc
 
-    pAy[gid] = Ax[gid] * px[xid];
-    pAx[gid] = Ay[gid] * py[yid];
+    pAx[gid] = Ax[gid] * px[xid];
+    pAy[gid] = Ay[gid] * py[yid];
     pAz[gid] = Az[gid] * pz[zid];
 
     GpAx[gid].x = exp(-pAx[gid]*gdt);
@@ -1148,17 +1148,17 @@ __global__ void aux_fields(double *V, double *K, double gdt, double dt,
     GpAz[gid].x = exp(-pAz[gid]*gdt);
     GpAz[gid].y = 0;
 
-    EV[gid].x=cos( -V[gid]*(dt/(2*HBAR)));
-    EV[gid].y=sin( -V[gid]*(dt/(2*HBAR)));
-    EK[gid].x=cos( -K[gid]*(dt/HBAR));
-    EK[gid].y=sin( -K[gid]*(dt/HBAR));
+    EV[gid].x=cos(V[gid]*(dt/(2*HBAR)));
+    EV[gid].y=sin(V[gid]*(dt/(2*HBAR)));
+    EK[gid].x=cos(K[gid]*(dt/HBAR));
+    EK[gid].y=sin(K[gid]*(dt/HBAR));
 
-    EpAz[gid].x=cos(-pAz[gid]*dt);
-    EpAz[gid].y=sin(-pAz[gid]*dt);
-    EpAy[gid].x=cos(-pAy[gid]*dt);
-    EpAy[gid].y=sin(-pAy[gid]*dt);
-    EpAx[gid].x=cos(-pAx[gid]*dt);
-    EpAx[gid].y=sin(-pAx[gid]*dt);
+    EpAz[gid].x=cos(pAz[gid]*dt);
+    EpAz[gid].y=sin(pAz[gid]*dt);
+    EpAy[gid].x=cos(pAy[gid]*dt);
+    EpAy[gid].y=sin(pAy[gid]*dt);
+    EpAx[gid].x=cos(pAx[gid]*dt);
+    EpAx[gid].y=sin(pAx[gid]*dt);
 }
 
 // Function to generate grids and treads for 2d and 3d cases
